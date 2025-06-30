@@ -9,16 +9,16 @@ import catering.businesslogic.event.Service;
 import catering.businesslogic.shift.Shift;
 import catering.businesslogic.user.User;
 
-public class KitchenTaskManager {
+public class TaskManager {
 
     private SummarySheet currentSumSheet;
-    private ArrayList<KitchenTaskEventReceiver> eventReceivers;
+    private ArrayList<TaskEventReceiver> eventReceivers;
 
-    public KitchenTaskManager() {
+    public TaskManager() {
         eventReceivers = new ArrayList<>();
     }
 
-    public void addEventReceiver(KitchenTaskEventReceiver rec) {
+    public void addEventReceiver(TaskEventReceiver rec) {
         this.eventReceivers.add(rec);
     }
 
@@ -66,12 +66,12 @@ public class KitchenTaskManager {
         return ss;
     }
 
-    public void addKitchenTask(KitchenTask t) {
-        KitchenTask added = currentSumSheet.addTask(t);
+    public void addKitchenTask(Task t) {
+        Task added = currentSumSheet.addTask(t);
         notifyTaskAdded(added);
     }
 
-    public void moveTask(KitchenTask t, int pos) throws UseCaseLogicException {
+    public void moveTask(Task t, int pos) throws UseCaseLogicException {
         if (currentSumSheet == null || currentSumSheet.getTaskPosition(t) < 0)
             throw new UseCaseLogicException();
         if (pos < 0 || pos >= currentSumSheet.getTaskListSize())
@@ -81,7 +81,7 @@ public class KitchenTaskManager {
         this.notifyTaskListSorted();
     }
 
-    public void addTaskInformation(KitchenTask task, int quantity, int portions, long minutes)
+    public void addTaskInformation(Task task, int quantity, int portions, long minutes)
             throws SummarySheetException, UseCaseLogicException {
         if (currentSumSheet == null)
             throw new UseCaseLogicException();
@@ -94,16 +94,16 @@ public class KitchenTaskManager {
         if (minutes < 0)
             throw new IllegalArgumentException("Minutes must be >= 0");
 
-        KitchenTask t = currentSumSheet.addTaskInformation(task, quantity, portions, minutes);
+        Task t = currentSumSheet.addTaskInformation(task, quantity, portions, minutes);
 
         notifyTaskChanged(t);
     }
 
-    public Assignment assignTask(KitchenTask t, Shift s) throws UseCaseLogicException {
+    public Assignment assignTask(Task t, Shift s) throws UseCaseLogicException {
         return assignTask(t, s, null);
     }
 
-    public Assignment assignTask(KitchenTask t, Shift s, User cook) throws UseCaseLogicException {
+    public Assignment assignTask(Task t, Shift s, User cook) throws UseCaseLogicException {
         if (currentSumSheet == null) {
             throw new UseCaseLogicException("Cannot assign task because there is no active summary sheet.");
         }
@@ -153,8 +153,8 @@ public class KitchenTaskManager {
         return currentSumSheet;
     }
 
-    public void setTaskReady(KitchenTask t) throws UseCaseLogicException {
-        KitchenTask task = currentSumSheet.setTaskReady(t);
+    public void setTaskReady(Task t) throws UseCaseLogicException {
+        Task task = currentSumSheet.setTaskReady(t);
         notifyTaskChanged(task);
     }
 
@@ -167,20 +167,20 @@ public class KitchenTaskManager {
         currentSumSheet = summarySheet;
     }
 
-    private void notifyTaskChanged(KitchenTask task) {
-        for (KitchenTaskEventReceiver er : eventReceivers) {
+    private void notifyTaskChanged(Task task) {
+        for (TaskEventReceiver er : eventReceivers) {
             er.updateTaskChanged(task);
         }
     }
 
     private void notifyAssignmentDeleted(Assignment ass) {
-        for (KitchenTaskEventReceiver er : eventReceivers) {
+        for (TaskEventReceiver er : eventReceivers) {
             er.updateAssignmentDeleted(ass);
         }
     }
 
     private void notifyAssignmentChanged(Assignment a) {
-        for (KitchenTaskEventReceiver er : eventReceivers) {
+        for (TaskEventReceiver er : eventReceivers) {
             er.updateAssignmentChanged(a);
         }
     }
@@ -191,25 +191,25 @@ public class KitchenTaskManager {
      * @param assignment The assignment that was added
      */
     private void notifyAssignmentAdded(Assignment assignment) {
-        for (KitchenTaskEventReceiver er : eventReceivers) {
+        for (TaskEventReceiver er : eventReceivers) {
             er.updateAssignmentAdded(currentSumSheet, assignment);
         }
     }
 
     private void notifyTaskListSorted() {
-        for (KitchenTaskEventReceiver er : eventReceivers) {
+        for (TaskEventReceiver er : eventReceivers) {
             er.updateTaskListSorted(currentSumSheet);
         }
     }
 
-    private void notifyTaskAdded(KitchenTask added) {
-        for (KitchenTaskEventReceiver er : eventReceivers) {
+    private void notifyTaskAdded(Task added) {
+        for (TaskEventReceiver er : eventReceivers) {
             er.updateTaskAdded(currentSumSheet, added);
         }
     }
 
     private void notifySheetGenerated(SummarySheet summarySheet) {
-        for (KitchenTaskEventReceiver er : eventReceivers) {
+        for (TaskEventReceiver er : eventReceivers) {
             er.updateSheetGenerated(summarySheet);
         }
     }

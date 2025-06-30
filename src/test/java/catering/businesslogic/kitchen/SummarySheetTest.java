@@ -18,7 +18,7 @@ import catering.businesslogic.UseCaseLogicException;
 import catering.businesslogic.event.Event;
 import catering.businesslogic.event.Service;
 import catering.businesslogic.shift.Shift;
-import catering.businesslogic.user.User;
+import catering.businesslogic.user.Worker;
 import catering.persistence.PersistenceManager;
 import catering.util.LogManager;
 
@@ -28,8 +28,8 @@ public class SummarySheetTest {
     private static final Logger LOGGER = LogManager.getLogger(SummarySheetTest.class);
 
     private static CatERing app;
-    private static User chef;
-    private static User cook;
+    private static Worker chef;
+    private static Worker cook;
     private static Event testEvent;
     private static Service testService;
 
@@ -41,15 +41,14 @@ public class SummarySheetTest {
 
     @BeforeEach
     void setup() {
-
         try {
             // Set up the chef user
-            chef = User.load("Antonio");
+            chef = Worker.load("Antonio");
             assertNotNull(chef, "Chef user should be loaded");
             assertTrue(chef.isChef(), "User should have chef role");
 
             // Set up the cook user
-            cook = User.load("Luca");
+            cook = Worker.load("Luca");
             assertNotNull(cook, "Cook user should be loaded");
 
             // Set up event and service
@@ -62,12 +61,13 @@ public class SummarySheetTest {
             // Login as chef
             app.getUserManager().fakeLogin(chef.getUserName());
 
-            assertEquals(chef, app.getUserManager().getCurrentUser(), "Current user should be the chef");
+            assertEquals(chef, app.getUserManager().getCurrentUser(),
+                    "Current user should be the chef");
 
         } catch (UseCaseLogicException e) {
             LOGGER.severe(e.getMessage());
+            fail("Setup failed: " + e.getMessage());
         }
-
     }
 
     @Test
@@ -77,7 +77,7 @@ public class SummarySheetTest {
 
         try {
             // Create summary sheet
-            SummarySheet sheet = app.getKitchenTaskManager().generateSummarySheet(testEvent, testService);
+            SummarySheet sheet = app.getTaskManager().generateSummarySheet(testEvent, testService);
 
             // Verify summary sheet was created properly
             assertNotNull(sheet, "Summary sheet should not be null");
@@ -98,12 +98,12 @@ public class SummarySheetTest {
 
         try {
             // Create summary sheet
-            SummarySheet sheet = app.getKitchenTaskManager().generateSummarySheet(testEvent, testService);
+            SummarySheet sheet = app.getTaskManager().generateSummarySheet(testEvent, testService);
             assertNotNull(sheet, "Summary sheet should not be null");
             assertTrue(sheet.getTaskList().size() > 0, "Task list should contain tasks");
 
             // Get the first task
-            KitchenTask taskToAssign = sheet.getTaskList().get(0);
+            Task taskToAssign = sheet.getTaskList().get(0);
             assertNotNull(taskToAssign, "Task to assign should not be null");
 
             // Create a shift
@@ -114,7 +114,7 @@ public class SummarySheetTest {
             shift.addBooking(cook);
 
             // Assign the task
-            Assignment assignment = app.getKitchenTaskManager().assignTask(taskToAssign, shift, cook);
+            Assignment assignment = app.getTaskManager().assignTask(taskToAssign, shift, cook);
 
             // Verify assignment
             assertNotNull(assignment, "Assignment should not be null");

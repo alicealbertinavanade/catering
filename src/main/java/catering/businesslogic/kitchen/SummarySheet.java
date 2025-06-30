@@ -15,6 +15,16 @@ import catering.persistence.ResultHandler;
 
 public class SummarySheet {
 
+    private int id;
+
+    private Service service;
+
+    private User owner;
+
+    private ArrayList<Task> taskList;
+
+    private ArrayList<Assignment> assignmentList;
+
     /**
      * Loads all summary sheets from the database
      * 
@@ -85,7 +95,7 @@ public class SummarySheet {
             }
 
             if (!s.taskList.isEmpty()) {
-                KitchenTask.saveAllNewTasks(s.id, s.taskList);
+                Task.saveAllNewTasks(s.id, s.taskList);
             }
         }
     }
@@ -119,42 +129,32 @@ public class SummarySheet {
             SummarySheet s = summarySheets.get(i);
             s.service = Service.loadById(serviceIds.get(i));
             s.owner = User.load(ownerIds.get(i));
-            s.taskList = KitchenTask.loadAllTasksBySumSheetId(s.id);
+            s.taskList = Task.loadAllTasksBySumSheetId(s.id);
             s.assignmentList = Assignment.loadAllAssignmentsBySumSheetId(s.id);
         }
 
         return summarySheets;
     }
 
-    private int id;
-
-    private Service service;
-
-    private User owner;
-
-    private ArrayList<KitchenTask> taskList;
-
-    private ArrayList<Assignment> assignmentList;
-
     public SummarySheet(Service service, User user) {
 
         this.service = service;
         this.owner = user;
-        taskList = new ArrayList<KitchenTask>();
+        taskList = new ArrayList<Task>();
         assignmentList = new ArrayList<>();
 
         service.getMenu().getKitchenProcesses()
-                .forEach(kitchenProcess -> taskList.add(new KitchenTask(kitchenProcess, kitchenProcess.getName())));
+                .forEach(kitchenProcess -> taskList.add(new Task(kitchenProcess, kitchenProcess.getName())));
     }
 
     private SummarySheet() {
     }
 
-    public int getTaskPosition(KitchenTask t) {
+    public int getTaskPosition(Task t) {
         return taskList.indexOf(t);
     }
 
-    public KitchenTask addTask(KitchenTask t) {
+    public Task addTask(Task t) {
         this.taskList.add(t);
         return t;
     }
@@ -167,16 +167,16 @@ public class SummarySheet {
         return taskList.size();
     }
 
-    public void moveTask(KitchenTask t, int pos) {
+    public void moveTask(Task t, int pos) {
         taskList.remove(t);
         taskList.add(pos, t);
     }
 
-    public ArrayList<KitchenTask> getTaskList() {
+    public ArrayList<Task> getTaskList() {
         return taskList;
     }
 
-    public Assignment addAssignment(KitchenTask t, Shift s, User cook) {
+    public Assignment addAssignment(Task t, Shift s, User cook) {
         Assignment ass = new Assignment(t, s, cook);
         assignmentList.add(ass);
         return ass;
@@ -204,14 +204,14 @@ public class SummarySheet {
         return assignmentList.remove(assignmentList.indexOf(a));
     }
 
-    public KitchenTask setTaskReady(KitchenTask t) throws UseCaseLogicException {
+    public Task setTaskReady(Task t) throws UseCaseLogicException {
         if (!taskList.contains(t))
             throw new UseCaseLogicException();
         t.setReady();
         return t;
     }
 
-    public KitchenTask addTaskInformation(KitchenTask task, int quantity, int portions, long minutes) {
+    public Task addTaskInformation(Task task, int quantity, int portions, long minutes) {
         task.setQuantity(quantity);
         task.setPortions(portions);
 
@@ -260,7 +260,7 @@ public class SummarySheet {
             if (taskList != null && !taskList.isEmpty()) {
                 sb.append("\n\nTasks:");
                 int count = 1;
-                for (KitchenTask task : taskList) {
+                for (Task task : taskList) {
                     sb.append("\n  ").append(count++).append(". ")
                             .append(task.toString());
                 }

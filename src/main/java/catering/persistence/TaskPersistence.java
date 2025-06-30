@@ -1,11 +1,11 @@
 package catering.persistence;
 
 import catering.businesslogic.kitchen.Assignment;
-import catering.businesslogic.kitchen.KitchenTaskEventReceiver;
+import catering.businesslogic.kitchen.TaskEventReceiver;
 import catering.businesslogic.kitchen.SummarySheet;
-import catering.businesslogic.kitchen.KitchenTask;
+import catering.businesslogic.kitchen.Task;
 
-public class KitchenTaskPersistence implements KitchenTaskEventReceiver {
+public class TaskPersistence implements TaskEventReceiver {
 
     @Override
     public void updateSheetGenerated(SummarySheet summarySheet) {
@@ -13,8 +13,8 @@ public class KitchenTaskPersistence implements KitchenTaskEventReceiver {
     }
 
     @Override
-    public void updateTaskAdded(SummarySheet currentSumSheet, KitchenTask added) {
-        KitchenTask.saveNewTask(currentSumSheet.getId(), added, currentSumSheet.getTaskPosition(added));
+    public void updateTaskAdded(SummarySheet currentSumSheet, Task added) {
+        Task.saveNewTask(currentSumSheet.getId(), added, currentSumSheet.getTaskPosition(added));
     }
 
     @Override
@@ -38,8 +38,8 @@ public class KitchenTaskPersistence implements KitchenTaskEventReceiver {
     }
 
     @Override
-    public void updateTaskChanged(KitchenTask task) {
-        KitchenTask.updateTaskChanged(task);
+    public void updateTaskChanged(Task task) {
+        Task.updateTaskChanged(task);
     }
 
 }

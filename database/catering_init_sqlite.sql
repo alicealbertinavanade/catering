@@ -39,7 +39,10 @@ DROP TABLE IF EXISTS `Users`;
 CREATE TABLE
     `Users` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-        `username` TEXT NOT NULL DEFAULT ''
+        `username` TEXT NOT NULL DEFAULT '',
+        `name` TEXT NOT NULL DEFAULT '',
+        `surname` TEXT NOT NULL DEFAULT '',
+        `contact_info` TEXT NOT NULL DEFAULT ''
     );
 
 CREATE TABLE
@@ -184,6 +187,15 @@ CREATE TABLE
         FOREIGN KEY (`task_id`) REFERENCES `Tasks` (`id`),
         FOREIGN KEY (`cook_id`) REFERENCES `Users` (`id`),
         FOREIGN KEY (`shift_id`) REFERENCES `Shifts` (`id`)
+    );
+
+CREATE TABLE
+    `VacationRequest` (
+        `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+        `approved` INTEGER DEFAULT NULL,
+        `from_date` DATE,
+        `to_date` DATE,
+        FOREIGN KEY (`user_id`) REFERENCES `Users` (`id`)
     );
 
 -- Clean up existing data
