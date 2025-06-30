@@ -7,4 +7,8 @@ public class RecipeManager {
     public ArrayList<Recipe> getRecipeBook() {
         return Recipe.getAllRecipes();
     }
+
+    public ArrayList<SupportOperation> getSupportOperation() {
+        return SupportOperation.getAllSupportOperations();
+    }
 }

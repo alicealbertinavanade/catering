@@ -4,17 +4,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import catering.businesslogic.UseCaseLogicException;
 import catering.businesslogic.event.Service;
+import catering.businesslogic.recipe.RecipeManager;
 import catering.businesslogic.shift.Shift;
 import catering.businesslogic.user.User;
 import catering.persistence.BatchUpdateHandler;
 import catering.persistence.PersistenceManager;
 import catering.persistence.ResultHandler;
+import catering.util.LogManager;
 
 public class SummarySheet {
 
+    private static final Logger LOGGER = LogManager.getLogger(SummarySheet.class);
     private int id;
 
     private Service service;
@@ -90,10 +94,11 @@ public class SummarySheet {
         });
 
         if (result[0] > 0) {
+            LOGGER.info("result: " + result[0]);
             if (!s.assignmentList.isEmpty()) {
                 Assignment.saveAllNewAssignment(s.id, s.assignmentList);
             }
-
+            LOGGER.info("SummarySheet created with ID: " + s.id);
             if (!s.taskList.isEmpty()) {
                 Task.saveAllNewTasks(s.id, s.taskList);
             }
@@ -136,15 +141,23 @@ public class SummarySheet {
         return summarySheets;
     }
 
-    public SummarySheet(Service service, User user) {
-
+    public SummarySheet(Service service, User user, boolean includeCommonTasks) {
         this.service = service;
         this.owner = user;
         taskList = new ArrayList<Task>();
         assignmentList = new ArrayList<>();
 
         service.getMenu().getKitchenProcesses()
-                .forEach(kitchenProcess -> taskList.add(new Task(kitchenProcess, kitchenProcess.getName())));
+                .forEach(kitchenProcess -> taskList
+                        .add(new Task(kitchenProcess, kitchenProcess.getName(), kitchenProcess.getType())));
+
+        if (includeCommonTasks) {
+            RecipeManager recipeManager = new RecipeManager();
+            recipeManager.getSupportOperation()
+                    .forEach(commonTask -> {
+                        taskList.add(new Task(commonTask, commonTask.getName(), commonTask.getType()));
+                    });
+        }
     }
 
     private SummarySheet() {

@@ -1,6 +1,7 @@
 package catering.businesslogic.user;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public interface User {
     public static enum Role {
@@ -8,6 +9,8 @@ public interface User {
     };
 
     String getUserName();
+
+    boolean isOccasionalUser();
 
     void setUsername(String username);
 
@@ -26,6 +29,8 @@ public interface User {
     boolean isService();
 
     boolean isOwner();
+
+    Set<Role> getRoles();
 
     // Factory methods for loading users
     static User load(String username) {

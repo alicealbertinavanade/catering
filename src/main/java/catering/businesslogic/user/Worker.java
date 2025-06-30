@@ -18,6 +18,7 @@ public class Worker implements User {
     private String telephone;
     private String fiscalCode;
     private int vacationDays;
+    private int isOccasionalUser;
     private Set<Role> roles;
 
     /**
@@ -41,6 +42,11 @@ public class Worker implements User {
         this.telephone = telephone;
         this.vacationDays = 0;
         this.roles = new HashSet<>();
+    }
+
+    @Override
+    public boolean isOccasionalUser() {
+        return false;
     }
 
     @Override
@@ -186,7 +192,7 @@ public class Worker implements User {
     }
 
     public static ArrayList<Worker> loadAllUsers() {
-        String userQuery = "SELECT * FROM Users";
+        String userQuery = "SELECT * FROM Users where is_occasional_user = 0";
         ArrayList<Worker> workers = new ArrayList<>();
 
         PersistenceManager.executeQuery(userQuery, new ResultHandler() {
@@ -243,9 +249,9 @@ public class Worker implements User {
         if (id != 0)
             return false; // Already exists
 
-        String query = "INSERT INTO User (username) VALUES(?)";
+        String query = "INSERT INTO User (username, name, surname, fiscal_code, telephone, is_occasional_user) VALUES (?, ?, ?, ?, ?, 0)";
 
-        PersistenceManager.executeUpdate(query, username);
+        PersistenceManager.executeUpdate(query, username, name, surname, fiscalCode, telephone);
         id = PersistenceManager.getLastId();
 
         if (id > 0) {
@@ -265,7 +271,7 @@ public class Worker implements User {
         if (id == 0)
             return false; // Not in DB
 
-        String query = "UPDATE Workers SET username = ? WHERE id = ?";
+        String query = "UPDATE Workers SET username =  ?, name = ?, surname = ?, fiscal_code = ?, telephone = ? WHERE id = ?";
 
         int rows = PersistenceManager.executeUpdate(query, username, id);
 

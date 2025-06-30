@@ -1,18 +1,22 @@
 package catering.businesslogic.recipe;
 
+import catering.businesslogic.kitchen.SummarySheet;
 import catering.persistence.PersistenceManager;
 import catering.persistence.ResultHandler;
+import catering.util.LogManager;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Preparation represents an intermediate food preparation step.
  * It implements KitchenProcess and has attributes specific to intermediate
  * steps.
  */
-public class Preparation implements KitchenProcess {
+public class SupportOperation implements KitchenProcess {
+    private static final Logger LOGGER = LogManager.getLogger(SupportOperation.class);
 
     private int id;
     private String name;
@@ -21,15 +25,15 @@ public class Preparation implements KitchenProcess {
     /**
      * Default constructor for loading from DB
      */
-    private Preparation() {
+    private SupportOperation() {
     }
 
     /**
-     * Creates a new preparation with the given name
+     * Creates a new process with the given name
      * 
-     * @param name The preparation name
+     * @param name The process name
      */
-    public Preparation(String name) {
+    public SupportOperation(String name) {
         id = 0;
         this.name = name;
         this.description = "";
@@ -61,7 +65,7 @@ public class Preparation implements KitchenProcess {
 
     @Override
     public int getType() {
-        return 1; // This is not a recipe
+        return 3; // This is not a recipe
     }
 
     @Override
@@ -90,9 +94,9 @@ public class Preparation implements KitchenProcess {
         if (obj == null || getClass() != obj.getClass())
             return false;
 
-        Preparation other = (Preparation) obj;
+        SupportOperation other = (SupportOperation) obj;
 
-        // If both preparations have valid IDs, compare by ID
+        // If both processes have valid IDs, compare by ID
         if (this.id > 0 && other.id > 0) {
             return this.id == other.id;
         }
@@ -129,36 +133,37 @@ public class Preparation implements KitchenProcess {
      * 
      * @return List of all preparations
      */
-    public static ArrayList<Preparation> loadAllPreparations() {
-        ArrayList<Preparation> preparations = new ArrayList<>();
+    public static ArrayList<SupportOperation> loadAllSupportOperations() {
+        ArrayList<SupportOperation> processes = new ArrayList<>();
 
-        String query = "SELECT * FROM Preparations";
+        String query = "SELECT * FROM SupportOperations";
         PersistenceManager.executeQuery(query, new ResultHandler() {
             @Override
             public void handle(ResultSet rs) throws SQLException {
-                Preparation prep = new Preparation(rs.getString("name"));
-                prep.id = rs.getInt("id");
+                SupportOperation proc = new SupportOperation(rs.getString("name"));
+                proc.id = rs.getInt("id");
 
                 // Load additional properties if they exist in DB
                 try {
-                    prep.description = rs.getString("description");
+                    proc.description = rs.getString("description");
                 } catch (SQLException e) {
-                    prep.description = "";
+                    proc.description = "";
                 }
 
-                preparations.add(prep);
+                processes.add(proc);
             }
         });
 
-        // Sort preparations by name
-        Collections.sort(preparations, new Comparator<Preparation>() {
+        // Sort processes by name
+        Collections.sort(processes, new Comparator<SupportOperation>() {
             @Override
-            public int compare(Preparation o1, Preparation o2) {
+            public int compare(SupportOperation o1, SupportOperation o2) {
                 return (o1.getName().compareTo(o2.getName()));
             }
         });
 
-        return preparations;
+        LOGGER.info("return processes");
+        return processes;
     }
 
     /**
@@ -166,41 +171,41 @@ public class Preparation implements KitchenProcess {
      * 
      * @return List of all preparations
      */
-    public static ArrayList<Preparation> getAllPreparations() {
-        return loadAllPreparations();
+    public static ArrayList<SupportOperation> getAllSupportOperations() {
+        return loadAllSupportOperations();
     }
 
     /**
-     * Loads a preparation by its ID
+     * Loads a process by its ID
      * 
-     * @param id The preparation ID
-     * @return The loaded preparation or null if not found
+     * @param id The process ID
+     * @return The loaded process or null if not found
      */
-    public static Preparation loadPreparationById(int id) {
-        Preparation[] prepHolder = new Preparation[1]; // Use array to allow modification in lambda
-        String query = "SELECT * FROM Preparations WHERE id = ?";
+    public static SupportOperation loadSupportOperationById(int id) {
+        SupportOperation[] processHolder = new SupportOperation[1]; // Use array to allow modification in lambda
+        String query = "SELECT * FROM SupportOperations WHERE id = ?";
 
         PersistenceManager.executeQuery(query, new ResultHandler() {
             @Override
             public void handle(ResultSet rs) throws SQLException {
-                Preparation prep = new Preparation();
-                prep.name = rs.getString("name");
-                prep.id = id;
+                SupportOperation process = new SupportOperation();
+                process.name = rs.getString("name");
+                process.id = id;
                 // Load additional properties if they exist in DB
                 try {
-                    prep.description = rs.getString("description");
+                    process.description = rs.getString("description");
                 } catch (SQLException e) {
-                    prep.description = "";
+                    process.description = "";
                 }
-                prepHolder[0] = prep;
+                processHolder[0] = process;
             }
         }, id); // Pass id as parameter
 
-        return prepHolder[0];
+        return processHolder[0];
     }
 
     /**
-     * Saves a new preparation to the database
+     * Saves a new process to the database
      * 
      * @return true if successful, false otherwise
      */
@@ -208,7 +213,7 @@ public class Preparation implements KitchenProcess {
         if (id != 0)
             return false; // Already exists
 
-        String query = "INSERT INTO Preparations (name, description) VALUES(?, ?)";
+        String query = "INSERT INTO SupportOperations (name, description) VALUES(?, ?)";
 
         PersistenceManager.executeUpdate(query, name, description);
         id = PersistenceManager.getLastId();
@@ -216,7 +221,7 @@ public class Preparation implements KitchenProcess {
     }
 
     /**
-     * Updates an existing preparation in the database
+     * Updates an existing process in the database
      * 
      * @return true if successful, false otherwise
      */
@@ -224,35 +229,10 @@ public class Preparation implements KitchenProcess {
         if (id == 0)
             return false; // Not in DB
 
-        String query = "UPDATE Preparations SET name = ?, description = ? WHERE id = ?";
+        String query = "UPDATE SupportOperations SET name = ?, description = ? WHERE id = ?";
 
         int rows = PersistenceManager.executeUpdate(query, name, description, id);
         return rows > 0;
     }
 
-    /**
-     * Gets recipes that use this preparation
-     * 
-     * @return List of recipes using this preparation
-     */
-    public List<Recipe> getUsedInRecipes() {
-        List<Recipe> result = new ArrayList<>();
-
-        if (id == 0)
-            return result; // Not in DB
-
-        String query = "SELECT recipe_id FROM RecipePreparations WHERE preparation_id = ?";
-        PersistenceManager.executeQuery(query, new ResultHandler() {
-            @Override
-            public void handle(ResultSet rs) throws SQLException {
-                int recipeId = rs.getInt("recipe_id");
-                Recipe recipe = Recipe.loadRecipe(recipeId);
-                if (recipe != null) {
-                    result.add(recipe);
-                }
-            }
-        }, id); // Pass id as parameter
-
-        return result;
-    }
 }

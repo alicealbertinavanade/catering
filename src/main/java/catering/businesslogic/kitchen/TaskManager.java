@@ -6,6 +6,7 @@ import catering.businesslogic.CatERing;
 import catering.businesslogic.UseCaseLogicException;
 import catering.businesslogic.event.Event;
 import catering.businesslogic.event.Service;
+import catering.businesslogic.recipe.KitchenProcess;
 import catering.businesslogic.shift.Shift;
 import catering.businesslogic.user.User;
 
@@ -22,12 +23,13 @@ public class TaskManager {
         this.eventReceivers.add(rec);
     }
 
-    public SummarySheet generateSummarySheet(Event event, Service service) throws UseCaseLogicException {
+    public SummarySheet generateSummarySheet(Event event, Service service, boolean includeCommonTasks)
+            throws UseCaseLogicException {
 
         User user = CatERing.getInstance().getUserManager().getCurrentUser();
 
-        if (!user.isChef())
-            throw new UseCaseLogicException("User is not a chef");
+        if (!user.isChef() && !user.isOwner() && !user.isOrganizer())
+            throw new UseCaseLogicException("User is not a chef, owner, or organizer");
 
         if (event == null)
             throw new UseCaseLogicException("Event not specified");
@@ -38,18 +40,34 @@ public class TaskManager {
         if (!event.containsService(service))
             throw new UseCaseLogicException("Event does not include service");
 
-        if (!user.equals(event.getChef()))
+        if (user.isChef() && !user.equals(event.getChef()))
             throw new UseCaseLogicException("User not assigned chef");
 
         if (service.getMenu() == null)
             throw new UseCaseLogicException("Service lacks menu");
 
-        SummarySheet newSummarySheet = new SummarySheet(service, user);
+        SummarySheet newSummarySheet = new SummarySheet(service, user, includeCommonTasks);
 
         this.setCurrentSumSheet(newSummarySheet);
         this.notifySheetGenerated(newSummarySheet);
 
         return newSummarySheet;
+    }
+
+    public Task generateTask(KitchenProcess process, String description)
+            throws UseCaseLogicException {
+
+        User user = CatERing.getInstance().getUserManager().getCurrentUser();
+
+        if (!user.isOrganizer() || !user.isOwner())
+            throw new UseCaseLogicException("User is not an organizer or owner");
+
+        if (process == null)
+            throw new UseCaseLogicException("Kitchen process not specified");
+
+        Task newTask = new Task(process, description, process.getType());
+
+        return newTask;
     }
 
     public ArrayList<SummarySheet> loadAllSumSheets() {
@@ -66,7 +84,7 @@ public class TaskManager {
         return ss;
     }
 
-    public void addKitchenTask(Task t) {
+    public void addTask(Task t) {
         Task added = currentSumSheet.addTask(t);
         notifyTaskAdded(added);
     }

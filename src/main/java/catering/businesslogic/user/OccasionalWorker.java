@@ -16,6 +16,7 @@ public class OccasionalWorker implements User {
     private String surname;
     private String fiscalCode;
     private String telephone;
+    private int isOccasionalUser;
     private Set<Role> roles;
 
     /**
@@ -37,6 +38,11 @@ public class OccasionalWorker implements User {
         this.surname = surname;
         this.fiscalCode = fiscalCode;
         this.telephone = telephone;
+    }
+
+    @Override
+    public boolean isOccasionalUser() {
+        return true;
     }
 
     @Override
@@ -184,7 +190,7 @@ public class OccasionalWorker implements User {
     }
 
     public static ArrayList<OccasionalWorker> loadAllUsers() {
-        String userQuery = "SELECT * FROM Users";
+        String userQuery = "SELECT * FROM Users WHERE is_occasional_user = 1";
         ArrayList<OccasionalWorker> users = new ArrayList<>();
 
         PersistenceManager.executeQuery(userQuery, new ResultHandler() {
@@ -230,7 +236,7 @@ public class OccasionalWorker implements User {
 
     // Database persistence methods
     public boolean save() {
-        String query = "INSERT INTO Users (username, name, surname, fiscal_code, telephone) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Users (username, name, surname, fiscal_code, telephone, is_occasional_user) VALUES (?, ?, ?, ?, ?, 1)";
         int[] generatedId = new int[1];
 
         PersistenceManager.executeUpdate(query, generatedId, username, name, surname, fiscalCode, telephone);

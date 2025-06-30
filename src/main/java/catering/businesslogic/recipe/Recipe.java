@@ -63,8 +63,8 @@ public class Recipe implements KitchenProcess {
     }
 
     @Override
-    public boolean isRecipe() {
-        return true; // This is a recipe
+    public int getType() {
+        return 2; // This is a recipe
     }
 
     @Override

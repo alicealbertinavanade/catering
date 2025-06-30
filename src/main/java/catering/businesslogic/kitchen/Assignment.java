@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import catering.businesslogic.recipe.Recipe;
 import catering.businesslogic.shift.Shift;
 import catering.businesslogic.user.User;
 import catering.persistence.BatchUpdateHandler;
@@ -18,17 +19,17 @@ public class Assignment {
 
     private int id;
     private Shift shift;
-    private KitchenTask task;
+    private Task task;
     private User cook;
 
     // Constructors
-    public Assignment(KitchenTask task, Shift shift, User cook) {
+    public Assignment(Task task, Shift shift, User cook) {
         this.task = task;
         this.shift = shift;
         this.cook = cook;
     }
 
-    public Assignment(KitchenTask task, Shift shift) {
+    public Assignment(Task task, Shift shift) {
         this.task = task;
         this.shift = shift;
         this.cook = null;
@@ -59,7 +60,7 @@ public class Assignment {
      * 
      * @return The Task object
      */
-    public KitchenTask getTask() {
+    public Task getTask() {
         return task;
     }
 
@@ -73,6 +74,24 @@ public class Assignment {
     }
 
     // Database-related code below this point
+    public static Assignment loadAssignment(int id) {
+        Assignment[] assignHolder = new Assignment[1]; // Use array to allow modification in lambda
+        String query = "SELECT * FROM Assignment WHERE id = ?";
+
+        PersistenceManager.executeQuery(query, new ResultHandler() {
+            @Override
+            public void handle(ResultSet rs) throws SQLException {
+                Assignment assign = new Assignment();
+                assign.id = rs.getInt("id");
+                assign.shift = Shift.loadItemById(rs.getInt("shift_id"));
+                assign.task = Task.loadTaskById(rs.getInt("task_id"));
+                assign.cook = User.load(rs.getInt("cook_id"));
+                assignHolder[0] = assign;
+            }
+        }, id); // Pass id as parameter
+
+        return assignHolder[0];
+    }
 
     /**
      * Loads all assignments for a specific summary sheet
@@ -105,7 +124,7 @@ public class Assignment {
         for (int i = 0; i < shiftIds.size(); i++) {
             Assignment a = assignments.get(i);
             a.cook = User.load(cookIds.get(i));
-            a.task = KitchenTask.loadTaskById(taskIds.get(i));
+            a.task = Task.loadTaskById(taskIds.get(i));
             a.shift = Shift.loadItemById(shiftIds.get(i));
 
         }

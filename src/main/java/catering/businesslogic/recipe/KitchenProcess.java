@@ -12,7 +12,7 @@ public interface KitchenProcess {
 
     String getName();
 
-    boolean isRecipe();
+    int getType();
 
     String getDescription();
 }

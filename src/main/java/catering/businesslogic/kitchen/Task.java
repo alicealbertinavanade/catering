@@ -4,13 +4,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import catering.businesslogic.recipe.KitchenProcess;
 import catering.businesslogic.recipe.Preparation;
 import catering.businesslogic.recipe.Recipe;
+import catering.businesslogic.recipe.SupportOperation;
 import catering.persistence.BatchUpdateHandler;
 import catering.persistence.PersistenceManager;
 import catering.persistence.ResultHandler;
+import catering.util.LogManager;
 
 public class Task {
 
@@ -20,23 +23,30 @@ public class Task {
     private int quantity;
     private int portions;
     private boolean ready;
-    private boolean type;
+    private int type;
+    private static final Logger LOGGER = LogManager.getLogger(Task.class);
 
     private Task() {
     }
 
     public Task(KitchenProcess rec) {
-        this(rec, rec.getName());
+        this(rec, rec.getName(), rec.getType());
     }
 
-    public Task(KitchenProcess rec, String desc) {
+    public Task(KitchenProcess rec, String desc, int typeProcess) {
         id = 0;
         kitchenProcess = rec;
+        type = typeProcess;
         description = desc;
-        type = rec.isRecipe();
         ready = false;
         quantity = 0;
         portions = 0;
+    }
+
+    public Task(String desc) {
+        id = 0;
+        description = desc;
+        ready = false;
     }
 
     public Task(Task mi) {
@@ -51,13 +61,14 @@ public class Task {
     public static void saveAllNewTasks(int id, ArrayList<Task> taskList) {
         String secInsert = "INSERT INTO Tasks (sumsheet_id, kitchenproc_id, description, type, position, ready, quantity, portions) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 
+        LOGGER.info("Summart sheet ID: " + id);
         PersistenceManager.executeBatchUpdate(secInsert, taskList.size(), new BatchUpdateHandler() {
             @Override
             public void handleBatchItem(PreparedStatement ps, int batchCount) throws SQLException {
                 ps.setInt(1, id);
                 ps.setInt(2, taskList.get(batchCount).kitchenProcess.getId());
                 ps.setString(3, taskList.get(batchCount).description);
-                ps.setBoolean(4, taskList.get(batchCount).type);
+                ps.setInt(4, taskList.get(batchCount).type);
                 ps.setInt(5, batchCount);
                 ps.setBoolean(6, taskList.get(batchCount).ready);
                 ps.setInt(7, taskList.get(batchCount).quantity);
@@ -79,7 +90,7 @@ public class Task {
                 id,
                 task.kitchenProcess.getId(),
                 task.getDescription(),
-                task.kitchenProcess.isRecipe(),
+                task.kitchenProcess.getType(),
                 taskPosition,
                 task.ready,
                 task.quantity,
@@ -129,7 +140,6 @@ public class Task {
         String query = "SELECT * FROM Tasks WHERE id = ?";
         Task[] taskHolder = new Task[1]; // Use array to allow modification in lambda
         ArrayList<Integer> ids = new ArrayList<>(1);
-        ArrayList<Boolean> types = new ArrayList<>(1);
 
         PersistenceManager.executeQuery(query, new ResultHandler() {
             @Override
@@ -145,9 +155,8 @@ public class Task {
                 t.ready = rs.getBoolean("ready");
                 t.quantity = rs.getInt("quantity");
 
-                t.type = rs.getBoolean("type");
+                t.type = rs.getInt("type");
                 ids.add(rs.getInt("kitchenproc_id")); // Changed from kitchen_proc_id
-                types.add(t.type);
                 taskHolder[0] = t;
             }
         }, id); // Pass id as parameter
@@ -157,10 +166,12 @@ public class Task {
         }
 
         Task t = taskHolder[0];
-        if (types.get(0)) {
-            t.kitchenProcess = Recipe.loadRecipe(ids.get(0));
-        } else {
+        if (t.type == 1) {
             t.kitchenProcess = Preparation.loadPreparationById(ids.get(0));
+        } else if (t.type == 2) {
+            t.kitchenProcess = Recipe.loadRecipe(ids.get(0));
+        } else if (t.type == 3) {
+            t.kitchenProcess = SupportOperation.loadSupportOperationById(ids.get(0));
         }
 
         return t;

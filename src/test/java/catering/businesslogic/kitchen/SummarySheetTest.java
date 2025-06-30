@@ -77,7 +77,7 @@ public class SummarySheetTest {
 
         try {
             // Create summary sheet
-            SummarySheet sheet = app.getTaskManager().generateSummarySheet(testEvent, testService);
+            SummarySheet sheet = app.getTaskManager().generateSummarySheet(testEvent, testService, false);
 
             // Verify summary sheet was created properly
             assertNotNull(sheet, "Summary sheet should not be null");
@@ -98,7 +98,7 @@ public class SummarySheetTest {
 
         try {
             // Create summary sheet
-            SummarySheet sheet = app.getTaskManager().generateSummarySheet(testEvent, testService);
+            SummarySheet sheet = app.getTaskManager().generateSummarySheet(testEvent, testService, false);
             assertNotNull(sheet, "Summary sheet should not be null");
             assertTrue(sheet.getTaskList().size() > 0, "Task list should contain tasks");
 

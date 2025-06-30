@@ -9,9 +9,7 @@ catering\persistence\ResultHandler.class
 catering\businesslogic\recipe\Recipe$2.class
 catering\businesslogic\menu\Section.class
 catering\businesslogic\event\Event.class
-catering\businesslogic\kitchen\KitchenTask.class
 catering\businesslogic\kitchen\SummarySheetException.class
-catering\businesslogic\kitchen\KitchenTask$1.class
 catering\businesslogic\recipe\RecipeManager.class
 catering\businesslogic\menu\MenuItem$1.class
 catering\businesslogic\user\User$Role.class
@@ -38,7 +36,6 @@ catering\businesslogic\menu\Menu$2.class
 catering\businesslogic\recipe\Recipe$4.class
 catering\persistence\BatchUpdateHandler.class
 catering\persistence\PersistenceManager.class
-catering\businesslogic\kitchen\KitchenTask$3.class
 catering\businesslogic\event\Event$1.class
 catering\businesslogic\recipe\Preparation$4.class
 catering\businesslogic\kitchen\SummarySheet$1.class
@@ -58,7 +55,6 @@ catering\businesslogic\menu\MenuItem.class
 catering\util\LogManager.class
 catering\businesslogic\recipe\Recipe$3.class
 catering\businesslogic\menu\Section$3.class
-catering\businesslogic\kitchen\KitchenTask$2.class
 catering\businesslogic\recipe\Preparation$3.class
 catering\persistence\EventPersistence.class
 catering\businesslogic\event\EventReceiver.class

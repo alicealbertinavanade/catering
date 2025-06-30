@@ -30,9 +30,13 @@ DROP TABLE IF EXISTS `Preparations`;
 
 DROP TABLE IF EXISTS `Recipes`;
 
+DROP TABLE IF EXISTS `SupportOperations`;
+
 DROP TABLE IF EXISTS `Roles`;
 
 DROP TABLE IF EXISTS `Users`;
+
+DROP TABLE IF EXISTS `VacationRequest`;
 
 -- 2) CREATE ALL TABLES (in dependency order)
 -- Start with tables that don't depend on others
@@ -40,9 +44,11 @@ CREATE TABLE
     `Users` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT,
         `username` TEXT NOT NULL DEFAULT '',
-        `name` TEXT NOT NULL DEFAULT '',
-        `surname` TEXT NOT NULL DEFAULT '',
-        `contact_info` TEXT NOT NULL DEFAULT ''
+        `name` TEXT ,
+        `surname` TEXT ,
+        `fiscal_code` TEXT,
+        `telephone` TEXT,
+        `is_occasional_user` INTEGER DEFAULT 0
     );
 
 CREATE TABLE
@@ -61,6 +67,13 @@ CREATE TABLE
 
 CREATE TABLE
     `Preparations` (
+        `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+        `name` TEXT,
+        `description` TEXT DEFAULT ''
+    );
+
+CREATE TABLE
+    `SupportOperations` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT,
         `name` TEXT,
         `description` TEXT DEFAULT ''
@@ -165,7 +178,6 @@ CREATE TABLE
         `id` INTEGER PRIMARY KEY AUTOINCREMENT,
         `sumsheet_id` INTEGER NOT NULL,
         `kitchenproc_id` INTEGER NOT NULL,
-        `preparation_id` INTEGER DEFAULT NULL,
         `description` TEXT,
         `type` INTEGER NOT NULL DEFAULT 1,
         `quantity` REAL DEFAULT NULL,
@@ -192,16 +204,22 @@ CREATE TABLE
 CREATE TABLE
     `VacationRequest` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+        `user_id` INTEGER NOT NULL,
         `approved` INTEGER DEFAULT NULL,
         `from_date` DATE,
         `to_date` DATE,
         FOREIGN KEY (`user_id`) REFERENCES `Users` (`id`)
     );
 
+
 -- Clean up existing data
 DELETE FROM RecipePreparations
 WHERE
     recipe_id > 0;
+
+DELETE FROM SupportOperations
+WHERE
+    id > 0;
 
 DELETE FROM Preparations
 WHERE
@@ -215,6 +233,18 @@ WHERE
 DELETE FROM sqlite_sequence
 WHERE
     name IN ('Recipes', 'Preparations');
+
+INSERT INTO
+    SupportOperations (name, description)
+VALUES
+    (
+        'Lavare i piatti',
+        'Pulizia dei piatti con acqua e sapone'
+    ),
+    (
+        'Lavare i pavimenti',
+        'Pulizia dei pavimenti con scopa e mop'
+    );
 
 INSERT INTO
     Preparations (name, description)
@@ -942,22 +972,26 @@ WHERE
 
 -- ===== ADD CUSTOM USERS WITH ROLES =====
 -- First, add users
-INSERT INTO Users (username) VALUES 
-('Marco'),      -- ID 1
-('Giulia'),   -- ID 2
-('Luca'),       -- ID 3
-('Sofia'),      -- ID 4
-('Antonio'), -- ID 5
-('Chiara'),   -- ID 6
-('Giovanni'),   -- ID 7
-('Francesca'); -- ID 8
+INSERT INTO Users (username, is_occasional_user) VALUES 
+('Marco', 0),      -- ID 1
+('Giulia', 0),   -- ID 2
+('Luca', 0),       -- ID 3
+('Sofia', 0),      -- ID 4
+('Antonio', 0), -- ID 5
+('Chiara', 0),   -- ID 6
+('Giovanni', 0),   -- ID 7
+('Francesca', 0), -- ID 8
+('Proprietario', 0), -- ID 9
+('OccasionalWorker1', 1), -- ID 10
+('Worker1', 0); -- ID 11
 
 -- Next, set up the role entries in Roles table (if not already present)
 INSERT OR IGNORE INTO Roles (id, role) VALUES
 (0,'CUOCO'),
 (1, 'CHEF'),
 (2, 'ORGANIZZATORE'),
-(3, 'SERVIZIO');
+(3, 'SERVIZIO'),
+(4, 'PROPRIETARIO');
 
 -- Now assign roles to users
 -- Staff (SERVIZIO)
@@ -968,7 +1002,9 @@ INSERT INTO UserRoles (user_id, role_id) VALUES
 -- Cooks (CUOCO)
 INSERT INTO UserRoles (user_id, role_id) VALUES
 (3, 0),    -- Luca is a cook
-(4, 0);    -- Sofia is a cook
+(4, 0),    -- Sofia is a cook
+(10, 0),   -- OccasionalWorker1 is a cook
+(11, 0);   -- Worker1 is a cook
 
 -- Chefs (CHEF)
 INSERT INTO UserRoles (user_id, role_id) VALUES
@@ -980,12 +1016,17 @@ INSERT INTO UserRoles (user_id, role_id) VALUES
 (7, 2),  -- Giovanni is an organizer
 (8, 2);  -- Francesca is an organizer
 
+-- Proprietario (OWNER)
+INSERT INTO UserRoles (user_id, role_id) VALUES
+(9, 4);  -- Proprietario is the owner
+
 -- Users with multiple roles
 INSERT INTO UserRoles (user_id, role_id) VALUES
 (5, 0),        -- Antonio is both chef and cook
 (7, 3),     -- Giovanni is both organizer and wait staff
 (4, 3),     -- Sofia is both cook and wait staff
 (6, 2); -- Chiara is both chef and organizer
+
 
 -- First create a menu
 INSERT INTO Menus (title, owner_id, published) 
