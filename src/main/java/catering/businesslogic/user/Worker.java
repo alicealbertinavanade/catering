@@ -1,13 +1,21 @@
 package catering.businesslogic.user;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
+import catering.businesslogic.kitchen.SummarySheet;
+import catering.businesslogic.shift.Shift;
 import catering.persistence.PersistenceManager;
 import catering.persistence.ResultHandler;
+import catering.util.LogManager;
 
 public class Worker implements User {
     private int id;
@@ -20,6 +28,7 @@ public class Worker implements User {
     private int vacationDays;
     private int isOccasionalUser;
     private Set<Role> roles;
+    private static final Logger LOGGER = LogManager.getLogger(Worker.class);
 
     /**
      * Default constructor for loading from DB
@@ -209,6 +218,56 @@ public class Worker implements User {
         });
 
         return workers;
+    }
+
+    public static Map<Shift, User> getWorkerAvailableFilteredByRole(Date date, Time startTime, Time endTime,
+            ArrayList<Integer> role) {
+        String userQuery = "SELECT ShiftBookings.* FROM ShiftBookings "
+                + "INNER JOIN Users ON Users.id = ShiftBookings.user_id "
+                + "INNER JOIN Shifts ON ShiftBookings.shift_id = Shifts.id "
+                + "INNER JOIN UserRoles ON Users.id = UserRoles.user_id "
+                + "WHERE Users.is_occasional_user = 0 "
+                + "AND Shifts.date = ? "
+                + "AND Shifts.start_time <= ? "
+                + "AND Shifts.end_time >= ? "
+                + "AND UserRoles.role_id IN (";
+
+        // Aggiungi i ruoli alla query
+        for (int i = 0; i < role.size(); i++) {
+            userQuery += role.get(i);
+            if (i < role.size() - 1) {
+                userQuery += ",";
+            }
+        }
+
+        userQuery += ") "
+                + "AND NOT EXISTS ("
+                + "SELECT 1 FROM Assignment "
+                + "INNER JOIN Tasks ON Assignment.task_id = Tasks.id "
+                + "INNER JOIN SummarySheets ON Tasks.sumsheet_id = SummarySheets.id "
+                + "INNER JOIN Services ON SummarySheets.service_id = Services.id "
+                + "WHERE Assignment.user_id = Users.id "
+                + "AND Services.date = ? "
+                + "AND Services.start_time < ? "
+                + "AND Services.end_time > ? "
+                + ") ";
+        Map<Shift, User> booking = new HashMap<>();
+
+        PersistenceManager.executeQuery(userQuery, new ResultHandler() {
+            @Override
+            public void handle(ResultSet rs) throws SQLException {
+                int shiftId = rs.getInt("shift_id");
+                Shift shift = Shift.loadItemById(shiftId);
+                int userId = rs.getInt("user_id");
+                User user = User.load(userId);
+                if (user != null) {
+                    booking.put(shift, user);
+                }
+            }
+        }, date.toString(), startTime.toString(), endTime.toString(), date.toString(), endTime.toString(),
+                startTime.toString());
+
+        return booking;
     }
 
     // Helper method to load roles for a worker

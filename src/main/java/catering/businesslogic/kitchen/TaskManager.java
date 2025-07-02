@@ -1,6 +1,7 @@
 package catering.businesslogic.kitchen;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import catering.businesslogic.CatERing;
 import catering.businesslogic.UseCaseLogicException;
@@ -9,11 +10,13 @@ import catering.businesslogic.event.Service;
 import catering.businesslogic.recipe.KitchenProcess;
 import catering.businesslogic.shift.Shift;
 import catering.businesslogic.user.User;
+import catering.util.LogManager;
 
 public class TaskManager {
 
     private SummarySheet currentSumSheet;
     private ArrayList<TaskEventReceiver> eventReceivers;
+    private static final Logger LOGGER = LogManager.getLogger(TaskManager.class);
 
     public TaskManager() {
         eventReceivers = new ArrayList<>();
@@ -47,7 +50,6 @@ public class TaskManager {
             throw new UseCaseLogicException("Service lacks menu");
 
         SummarySheet newSummarySheet = new SummarySheet(service, user, includeCommonTasks);
-
         this.setCurrentSumSheet(newSummarySheet);
         this.notifySheetGenerated(newSummarySheet);
 
@@ -121,14 +123,17 @@ public class TaskManager {
         return assignTask(t, s, null);
     }
 
-    public Assignment assignTask(Task t, Shift s, User cook) throws UseCaseLogicException {
+    public Assignment assignTask(Task t, Shift s, User user) throws UseCaseLogicException {
         if (currentSumSheet == null) {
             throw new UseCaseLogicException("Cannot assign task because there is no active summary sheet.");
         }
-        if (cook != null && !CatERing.getInstance().getShiftManager().isAvailable(cook, s)) {
-            throw new UseCaseLogicException("Cook " + cook.getUserName() + " is not available for the selected shift.");
+        if (user != null && !CatERing.getInstance().getShiftManager().isBooked(user, s)) {
+            throw new UseCaseLogicException("User " + user.getUserName() + " is not available for the selected shift.");
         }
-        Assignment a = currentSumSheet.addAssignment(t, s, cook);
+        if (user != null && CatERing.getInstance().getShiftManager().hasAssignment(user, s)) {
+            throw new UseCaseLogicException("User " + user.getUserName() + " is not available for the selected shift.");
+        }
+        Assignment a = currentSumSheet.addAssignment(t, s, user);
         this.notifyAssignmentAdded(a);
 
         return a;
@@ -154,7 +159,7 @@ public class TaskManager {
 
         if (currentSumSheet == null)
             throw new UseCaseLogicException();
-        if (cook == null || CatERing.getInstance().getShiftManager().isAvailable(cook, shift))
+        if (cook == null || CatERing.getInstance().getShiftManager().isBooked(cook, shift))
             a = currentSumSheet.modifyAssignment(ass, shift, cook);
         else
             throw new UseCaseLogicException();

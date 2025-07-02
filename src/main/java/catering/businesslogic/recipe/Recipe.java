@@ -72,6 +72,11 @@ public class Recipe implements KitchenProcess {
         return description;
     }
 
+    @Override
+    public ArrayList<Integer> getRequiredRole() {
+        return new ArrayList<>(Arrays.asList(0, 1));
+    }
+
     /**
      * Sets the description for this recipe
      * 

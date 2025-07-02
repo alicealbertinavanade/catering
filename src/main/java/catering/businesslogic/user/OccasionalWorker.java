@@ -1,7 +1,9 @@
 package catering.businesslogic.user;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -209,6 +211,26 @@ public class OccasionalWorker implements User {
         });
 
         return users;
+    }
+
+    public static ArrayList<OccasionalWorker> loadUsersAvailable(Date date, Time startTime, Time endTime) {
+        String userQuery = "SELECT * FROM Users INNER JOIN ShiftBookings ON Users.id = ShiftBookings.user_id INNER JOIN Shifts ON ShiftBookings.shift_id = Shifts.id WHERE is_occasional_user = 1 AND Shifts.date = ? AND Shifts.start_time >= ? AND Shifts.end_time <= ?";
+        ArrayList<OccasionalWorker> workers = new ArrayList<>();
+
+        PersistenceManager.executeQuery(userQuery, new ResultHandler() {
+            @Override
+            public void handle(ResultSet rs) throws SQLException {
+                OccasionalWorker u = new OccasionalWorker();
+                u.id = rs.getInt("id");
+                u.username = rs.getString("username");
+
+                // Load roles for this worker
+                loadRolesForUser(u);
+                workers.add(u);
+            }
+        }, date, startTime, endTime); // Pass parameters
+
+        return workers;
     }
 
     // Helper method to load roles for an occasional worker

@@ -2,6 +2,8 @@ package catering.businesslogic.user;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Order;
@@ -12,8 +14,10 @@ import catering.businesslogic.CatERing;
 import catering.businesslogic.UseCaseLogicException;
 import catering.businesslogic.event.Event;
 import catering.businesslogic.event.Service;
+import catering.businesslogic.kitchen.Assignment;
 import catering.businesslogic.kitchen.SummarySheet;
 import catering.businesslogic.kitchen.Task;
+import catering.businesslogic.shift.Shift;
 import catering.persistence.PersistenceManager;
 import catering.util.LogManager;
 
@@ -22,8 +26,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
 @TestMethodOrder(OrderAnnotation.class)
-public class UserLoadTest {
-    private static final Logger LOGGER = LogManager.getLogger(UserLoadTest.class);
+public class UserManageTest {
+    private static final Logger LOGGER = LogManager.getLogger(UserManageTest.class);
 
     private static CatERing app;
     private static User owner;
@@ -75,19 +79,30 @@ public class UserLoadTest {
 
     @Test
     @Order(1)
-    void testAssignTaskForUser() {
-        LOGGER.info("Testing task assignment for user");
+    void testAssignTaskForWorkerAndOccasionalWorker() {
+        LOGGER.info("Testing task assignment for worker and occasional worker");
 
         try {
             // Create summary sheet
             SummarySheet sheet = app.getTaskManager().generateSummarySheet(testEvent, testService, true);
-
-            // Verify summary sheet was created properly
             assertNotNull(sheet, "Summary sheet should not be null");
-            assertNotNull(sheet.getTaskList(), "Task list should not be null");
             assertTrue(sheet.getTaskList().size() > 0, "Task list should contain tasks");
 
-            LOGGER.info("Created summary sheet: " + sheet.toString());
+            // Get the first task
+            Task taskToAssign = sheet.getTaskList().get(0);
+            assertNotNull(taskToAssign, "Task to assign should not be null");
+
+            Shift shift = Shift.loadItemById(1);
+
+            // Assign the task
+            Assignment assignment = app.getTaskManager().assignTask(taskToAssign, shift, worker1);
+
+            // Verify assignment
+            assertNotNull(assignment, "Assignment should not be null");
+            assertEquals(taskToAssign, assignment.getTask(), "Assignment should reference the correct task");
+            assertEquals(worker1, assignment.getUser(), "Assignment should reference the correct worker");
+            assertEquals(shift, assignment.getShift(), "Assignment should reference the correct shift");
+
         } catch (UseCaseLogicException e) {
             fail("Exception should not be thrown: " + e.getMessage());
         }

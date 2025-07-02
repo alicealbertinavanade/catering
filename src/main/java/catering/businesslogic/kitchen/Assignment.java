@@ -20,19 +20,19 @@ public class Assignment {
     private int id;
     private Shift shift;
     private Task task;
-    private User cook;
+    private User user;
 
     // Constructors
-    public Assignment(Task task, Shift shift, User cook) {
+    public Assignment(Task task, Shift shift, User user) {
         this.task = task;
         this.shift = shift;
-        this.cook = cook;
+        this.user = user;
     }
 
     public Assignment(Task task, Shift shift) {
         this.task = task;
         this.shift = shift;
-        this.cook = null;
+        this.user = null;
     }
 
     Assignment() {
@@ -47,12 +47,12 @@ public class Assignment {
         this.shift = shift;
     }
 
-    public User getCook() {
-        return cook;
+    public User getUser() {
+        return user;
     }
 
-    public void setCook(User cook) {
-        this.cook = cook;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     /**
@@ -85,7 +85,7 @@ public class Assignment {
                 assign.id = rs.getInt("id");
                 assign.shift = Shift.loadItemById(rs.getInt("shift_id"));
                 assign.task = Task.loadTaskById(rs.getInt("task_id"));
-                assign.cook = User.load(rs.getInt("cook_id"));
+                assign.user = User.load(rs.getInt("user_id"));
                 assignHolder[0] = assign;
             }
         }, id); // Pass id as parameter
@@ -104,7 +104,7 @@ public class Assignment {
         ArrayList<Assignment> assignments = new ArrayList<>();
         ArrayList<Integer> shiftIds = new ArrayList<>();
         ArrayList<Integer> taskIds = new ArrayList<>();
-        ArrayList<Integer> cookIds = new ArrayList<>();
+        ArrayList<Integer> userIds = new ArrayList<>();
 
         PersistenceManager.executeQuery(query, new ResultHandler() {
             @Override
@@ -117,13 +117,46 @@ public class Assignment {
 
                 shiftIds.add(rs.getInt("shift_id"));
                 taskIds.add(rs.getInt("task_id"));
-                cookIds.add(rs.getInt("cook_id"));
+                userIds.add(rs.getInt("user_id"));
             }
         }, id); // Pass id as parameter
 
         for (int i = 0; i < shiftIds.size(); i++) {
             Assignment a = assignments.get(i);
-            a.cook = User.load(cookIds.get(i));
+            a.user = User.load(userIds.get(i));
+            a.task = Task.loadTaskById(taskIds.get(i));
+            a.shift = Shift.loadItemById(shiftIds.get(i));
+
+        }
+
+        return assignments;
+    }
+
+    public static ArrayList<Assignment> loadAllAssignmentsByShift(Shift s) {
+        String query = "SELECT * FROM Assignment WHERE shift_id = ?";
+        ArrayList<Assignment> assignments = new ArrayList<>();
+        ArrayList<Integer> shiftIds = new ArrayList<>();
+        ArrayList<Integer> taskIds = new ArrayList<>();
+        ArrayList<Integer> userIds = new ArrayList<>();
+
+        PersistenceManager.executeQuery(query, new ResultHandler() {
+            @Override
+            public void handle(ResultSet rs) throws SQLException {
+                // Create a new Assignment object for each row
+                Assignment a = new Assignment();
+                a.id = rs.getInt("id");
+
+                assignments.add(a);
+
+                shiftIds.add(rs.getInt("shift_id"));
+                taskIds.add(rs.getInt("task_id"));
+                userIds.add(rs.getInt("user_id"));
+            }
+        }, s); // Pass s as parameter
+
+        for (int i = 0; i < shiftIds.size(); i++) {
+            Assignment a = assignments.get(i);
+            a.user = User.load(userIds.get(i));
             a.task = Task.loadTaskById(taskIds.get(i));
             a.shift = Shift.loadItemById(shiftIds.get(i));
 
@@ -138,10 +171,10 @@ public class Assignment {
      * @param a The assignment to update
      */
     public static void updateAssignment(Assignment a) {
-        String upd = "UPDATE Assignment SET shift_id = ?, cook_id = ? WHERE id = ?";
+        String upd = "UPDATE Assignment SET shift_id = ?, user_id = ? WHERE id = ?";
         PersistenceManager.executeUpdate(upd,
                 a.shift.getId(),
-                (a.cook == null ? 0 : a.cook.getId()),
+                (a.user == null ? 0 : a.user.getId()),
                 a.id);
     }
 
@@ -163,14 +196,14 @@ public class Assignment {
      * @param assignmentList The list of assignments to save
      */
     public static void saveAllNewAssignment(int id, ArrayList<Assignment> assignmentList) {
-        String secInsert = "INSERT INTO Assignment (sumsheet_id, shift_id, task_id, cook_id) VALUES (?, ?, ?, ?);";
+        String secInsert = "INSERT INTO Assignment (sumsheet_id, shift_id, task_id, user_id) VALUES (?, ?, ?, ?);";
         PersistenceManager.executeBatchUpdate(secInsert, assignmentList.size(), new BatchUpdateHandler() {
             @Override
             public void handleBatchItem(PreparedStatement ps, int batchCount) throws SQLException {
                 ps.setInt(1, id);
                 ps.setInt(2, assignmentList.get(batchCount).shift.getId());
                 ps.setInt(3, assignmentList.get(batchCount).task.getId());
-                ps.setInt(4, assignmentList.get(batchCount).cook.getId());
+                ps.setInt(4, assignmentList.get(batchCount).user.getId());
             }
 
             @Override
@@ -188,12 +221,12 @@ public class Assignment {
      * @param a  The assignment to save
      */
     public static void saveNewAssignment(int id, Assignment a) {
-        String query = "INSERT INTO Assignment (sumsheet_id, shift_id, task_id, cook_id) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO Assignment (sumsheet_id, shift_id, task_id, user_id) VALUES (?, ?, ?, ?)";
         PersistenceManager.executeUpdate(query,
                 id,
                 a.shift.getId(),
                 a.task.getId(),
-                (a.cook == null ? 0 : a.cook.getId()));
+                (a.user == null ? 0 : a.user.getId()));
         a.id = PersistenceManager.getLastId();
 
     }
@@ -202,7 +235,7 @@ public class Assignment {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Task: ").append(getTask() != null ? getTask().getDescription() : "none");
-        sb.append(", Cook: ").append(getCook() != null ? getCook().getUserName() : "unassigned");
+        sb.append(", User: ").append(getUser() != null ? getUser().getUserName() : "unassigned");
 
         Shift shift = getShift();
         if (shift != null) {

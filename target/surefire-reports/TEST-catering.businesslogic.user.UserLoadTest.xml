@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="catering.businesslogic.user.UserLoadTest" time="0.666" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="catering.businesslogic.user.UserLoadTest" time="0.45" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="24"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -16,7 +16,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="C:\Program Files\jdk-24.0.1\bin"/>
-    <property name="sun.java.command" value="C:\Users\alice.albertin\AppData\Local\Temp\surefire5674132287782324541\surefirebooter-20250701004601827_3.jar C:\Users\alice.albertin\AppData\Local\Temp\surefire5674132287782324541 2025-07-01T00-46-01_635-jvmRun1 surefire-20250701004601827_1tmp surefire_0-20250701004601827_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\alice.albertin\AppData\Local\Temp\surefire11703571727623709794\surefirebooter-20250701100834087_3.jar C:\Users\alice.albertin\AppData\Local\Temp\surefire11703571727623709794 2025-07-01T10-08-33_940-jvmRun1 surefire-20250701100834087_1tmp surefire_0-20250701100834087_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\target\test-classes;c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\target\classes;C:\Users\alice.albertin\.m2\repository\org\xerial\sqlite-jdbc\3.49.1.0\sqlite-jdbc-3.49.1.0.jar;C:\Users\alice.albertin\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.12.2\junit-jupiter-api-5.12.2.jar;C:\Users\alice.albertin\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\alice.albertin\.m2\repository\org\junit\platform\junit-platform-commons\1.12.2\junit-platform-commons-1.12.2.jar;C:\Users\alice.albertin\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\alice.albertin\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.12.2\junit-jupiter-engine-5.12.2.jar;C:\Users\alice.albertin\.m2\repository\org\junit\platform\junit-platform-engine\1.12.2\junit-platform-engine-1.12.2.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -31,7 +31,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\alice.albertin\AppData\Local\Temp\surefire5674132287782324541\surefirebooter-20250701004601827_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\alice.albertin\AppData\Local\Temp\surefire11703571727623709794\surefirebooter-20250701100834087_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="24.0.1+9-30"/>
@@ -60,31 +60,13 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="68.0"/>
   </properties>
-  <testcase name="testAssignTaskForUser" classname="catering.businesslogic.user.UserLoadTest" time="0.19">
-    <system-err><![CDATA[2025-07-01 00:46:05.061 [INFO] catering.persistence.PersistenceManager: Database initialized successfully from database/catering_init_sqlite.sql
-2025-07-01 00:46:05.178 [INFO] catering.businesslogic.user.UserManager: Attempting login for user: Proprietario
-2025-07-01 00:46:05.183 [INFO] catering.businesslogic.user.UserManager: User successfully logged in: Proprietario
-2025-07-01 00:46:05.183 [INFO] catering.businesslogic.user.UserLoadTest: Testing task assignment for user
-2025-07-01 00:46:05.189 [INFO] catering.businesslogic.recipe.SupportOperation: return processes
-2025-07-01 00:46:05.198 [INFO] catering.businesslogic.kitchen.SummarySheet: result: 1
-2025-07-01 00:46:05.198 [INFO] catering.businesslogic.kitchen.SummarySheet: SummarySheet created with ID: 0
-2025-07-01 00:46:05.199 [INFO] catering.businesslogic.kitchen.Task: Summart sheet ID: 0
-2025-07-01 00:46:05.251 [INFO] catering.businesslogic.user.UserLoadTest: Created summary sheet: 
-
-SummarySheet [ID: 0, Owner: Proprietario, Service: Pranzo Buffet Aziendale, Tasks: 11, Assignments: 0]
-
-Tasks:
-  1. [ ] Caprese
-  2. [ ] Prosciutto e Melone
-  3. [ ] Spaghetti alla Carbonara
-  4. [ ] Salsa carbonara
-  5. [ ] Ossobuco alla Milanese
-  6. [ ] Brodo di carne
-  7. [ ] Gremolata
-  8. [ ] Panna Cotta
-  9. [ ] Gelato Artigianale
-  10. [ ] Lavare i pavimenti
-  11. [ ] Lavare i piatti
+  <testcase name="testAssignTaskForUser" classname="catering.businesslogic.user.UserLoadTest" time="0.149">
+    <system-err><![CDATA[2025-07-01 10:08:36.422 [INFO] catering.persistence.PersistenceManager: Database initialized successfully from database/catering_init_sqlite.sql
+2025-07-01 10:08:36.498 [INFO] catering.businesslogic.user.UserManager: Attempting login for user: Proprietario
+2025-07-01 10:08:36.501 [INFO] catering.businesslogic.user.UserManager: User successfully logged in: Proprietario
+2025-07-01 10:08:36.501 [INFO] catering.businesslogic.user.UserLoadTest: Testing task assignment for user
+2025-07-01 10:08:36.512 [INFO] catering.businesslogic.kitchen.SummarySheet: SummarySheet created with ID: 1
+2025-07-01 10:08:36.542 [INFO] catering.businesslogic.kitchen.SummarySheet: SummarySheet created with ID: 2
 ]]></system-err>
   </testcase>
 </testsuite>

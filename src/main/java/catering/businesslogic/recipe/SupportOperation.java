@@ -73,6 +73,11 @@ public class SupportOperation implements KitchenProcess {
         return description;
     }
 
+    @Override
+    public ArrayList<Integer> getRequiredRole() {
+        return new ArrayList<>(Arrays.asList(3));
+    }
+
     /**
      * Sets the description for this preparation
      * 
@@ -162,7 +167,6 @@ public class SupportOperation implements KitchenProcess {
             }
         });
 
-        LOGGER.info("return processes");
         return processes;
     }
 

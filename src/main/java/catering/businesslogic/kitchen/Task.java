@@ -19,6 +19,7 @@ public class Task {
 
     private int id;
     private String description;
+    private SummarySheet summarySheet;
     private KitchenProcess kitchenProcess;
     private int quantity;
     private int portions;
@@ -61,7 +62,6 @@ public class Task {
     public static void saveAllNewTasks(int id, ArrayList<Task> taskList) {
         String secInsert = "INSERT INTO Tasks (sumsheet_id, kitchenproc_id, description, type, position, ready, quantity, portions) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 
-        LOGGER.info("Summart sheet ID: " + id);
         PersistenceManager.executeBatchUpdate(secInsert, taskList.size(), new BatchUpdateHandler() {
             @Override
             public void handleBatchItem(PreparedStatement ps, int batchCount) throws SQLException {
@@ -78,6 +78,7 @@ public class Task {
             @Override
             public void handleGeneratedIds(ResultSet rs, int count) throws SQLException {
                 taskList.get(count).id = rs.getInt(1);
+                taskList.get(count).summarySheet = SummarySheet.loadSummarySheetById(rs.getInt(2));
             }
         });
 
@@ -97,7 +98,6 @@ public class Task {
                 task.portions);
 
         task.id = PersistenceManager.getLastId();
-
     }
 
     public static ArrayList<Task> loadAllTasksBySumSheetId(int id) {
@@ -113,6 +113,7 @@ public class Task {
                 Task t = new Task();
                 t.id = rs.getInt("id");
 
+                t.summarySheet = SummarySheet.loadSummarySheetById(rs.getInt("sumsheet_id"));
                 t.description = rs.getString("description");
                 t.portions = rs.getInt("portions");
                 t.ready = rs.getBoolean("ready");

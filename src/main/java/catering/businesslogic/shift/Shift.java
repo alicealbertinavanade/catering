@@ -1,5 +1,6 @@
 package catering.businesslogic.shift;
 
+import catering.businesslogic.kitchen.Assignment;
 import catering.businesslogic.user.User;
 import catering.persistence.PersistenceManager;
 import catering.persistence.ResultHandler;
@@ -294,6 +295,13 @@ public class Shift {
 
     public boolean isBooked(User u) {
         return bookedUsers.containsValue(u);
+    }
+
+    public boolean hasAssignment(User u) {
+        var assignments = Assignment.loadAllAssignmentsByShift(this);
+        assignments
+                .forEach(a -> LOGGER.info("Found assignment: " + a.getId() + " for user " + a.getUser().getUserName()));
+        return assignments.stream().anyMatch(a -> a.getUser().getId() == u.getId());
     }
 
     public int getId() {

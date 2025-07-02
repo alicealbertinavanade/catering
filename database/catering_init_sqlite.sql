@@ -143,9 +143,9 @@ CREATE TABLE
         `event_id` INTEGER NOT NULL,
         `name` TEXT,
         `approved_menu_id` INTEGER DEFAULT 0,
-        `service_date` DATE,
-        `time_start` TIME,
-        `time_end` TIME,
+        `date` DATE,
+        `start_time` TIME,
+        `end_time` TIME,
         `location` TEXT
     );
 
@@ -161,7 +161,7 @@ CREATE TABLE
     `ShiftBookings` (
         `shift_id` INTEGER NOT NULL,
         `user_id` INTEGER NOT NULL,
-        PRIMARY KEY (`shift_id`, `user_id`)
+        PRIMARY KEY (`shift_id`, `user_id`),
     );
 
 CREATE TABLE
@@ -193,11 +193,11 @@ CREATE TABLE
         `id` INTEGER PRIMARY KEY AUTOINCREMENT,
         `sumsheet_id` INTEGER NOT NULL,
         `task_id` INTEGER NOT NULL,
-        `cook_id` INTEGER NOT NULL,
+        `user_id` INTEGER NOT NULL,
         `shift_id` INTEGER NOT NULL,
         FOREIGN KEY (`sumsheet_id`) REFERENCES `SummarySheets` (`id`),
         FOREIGN KEY (`task_id`) REFERENCES `Tasks` (`id`),
-        FOREIGN KEY (`cook_id`) REFERENCES `Users` (`id`),
+        FOREIGN KEY (`user_id`) REFERENCES `Users` (`id`),
         FOREIGN KEY (`shift_id`) REFERENCES `Shifts` (`id`)
     );
 
@@ -985,6 +985,13 @@ INSERT INTO Users (username, is_occasional_user) VALUES
 ('OccasionalWorker1', 1), -- ID 10
 ('Worker1', 0); -- ID 11
 
+INSERT INTO Shifts (date, start_time, end_time) VALUES 
+('2025-06-15', '12:00:00', '16:00:00');      -- ID 1
+
+INSERT INTO ShiftBookings (user_id, shift_id) VALUES
+(11, 1),  -- Worker is working in shift 1
+(10, 1);  -- OccasionalWorker1 is working in shift 1
+
 -- Next, set up the role entries in Roles table (if not already present)
 INSERT OR IGNORE INTO Roles (id, role) VALUES
 (0,'CUOCO'),
@@ -1075,9 +1082,9 @@ INSERT INTO Services (
     event_id, 
     name, 
     approved_menu_id, 
-    service_date, 
-    time_start, 
-    time_end, 
+    date, 
+    start_time, 
+    end_time, 
     location
 ) VALUES (
     1,                          -- Event ID
@@ -1094,9 +1101,9 @@ INSERT INTO Services (
     event_id, 
     name, 
     approved_menu_id, 
-    service_date, 
-    time_start, 
-    time_end, 
+    date, 
+    start_time, 
+    end_time, 
     location
 ) VALUES (
     1,                          -- Event ID

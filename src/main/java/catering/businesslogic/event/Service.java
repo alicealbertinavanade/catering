@@ -123,7 +123,7 @@ public class Service {
 
     // Database operations
     public void saveNewService() {
-        String query = "INSERT INTO Services (event_id, name, service_date, time_start, time_end, location) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Services (event_id, name, date, start_time, end_time, location) VALUES (?, ?, ?, ?, ?, ?)";
 
         // Convert date to timestamp for storage
         Long dateTimestamp = (this.getDate() != null) ? this.getDate().getTime() : null;
@@ -141,7 +141,7 @@ public class Service {
     }
 
     public void updateService() {
-        String query = "UPDATE Services SET name = ?, service_date = ?, time_start = ?, time_end = ?, location = ? WHERE id = ?";
+        String query = "UPDATE Services SET name = ?, date = ?, start_time = ?, end_time = ?, location = ? WHERE id = ?";
 
         Long dateTimestamp = (this.getDate() != null) ? this.getDate().getTime() : null;
 
@@ -176,7 +176,7 @@ public class Service {
     // Static methods for data loading
     public static ArrayList<Service> loadServicesForEvent(int eventId) {
         ArrayList<Service> services = new ArrayList<>();
-        String query = "SELECT * FROM Services WHERE event_id = ? ORDER BY service_date, time_start";
+        String query = "SELECT * FROM Services WHERE event_id = ? ORDER BY date, start_time";
 
         PersistenceManager.executeQuery(query, new ResultHandler() {
             @Override
@@ -186,9 +186,9 @@ public class Service {
                 s.name = rs.getString("name");
 
                 try {
-                    s.date = Date.valueOf(rs.getString("service_date"));
-                    s.timeStart = Time.valueOf(rs.getString("time_start"));
-                    s.timeEnd = Time.valueOf(rs.getString("time_end"));
+                    s.date = Date.valueOf(rs.getString("date"));
+                    s.timeStart = Time.valueOf(rs.getString("start_time"));
+                    s.timeEnd = Time.valueOf(rs.getString("end_time"));
                 } catch (IllegalArgumentException ex) {
                     // Ignore parsing errors
                 }
@@ -232,9 +232,9 @@ public class Service {
                 s.name = rs.getString("name");
 
                 try {
-                    String dateStr = rs.getString("service_date");
-                    String startTimeStr = rs.getString("time_start");
-                    String endTimeStr = rs.getString("time_end");
+                    String dateStr = rs.getString("date");
+                    String startTimeStr = rs.getString("start_time");
+                    String endTimeStr = rs.getString("end_time");
 
                     if (dateStr != null && !dateStr.isEmpty()) {
                         s.date = Date.valueOf(dateStr);
@@ -287,7 +287,7 @@ public class Service {
         if (this.id > 0 && other.id > 0) {
             return this.id == other.id;
         }
-        
+
         // Otherwise, compare by name and items
         boolean nameMatch = (this.name == null && other.name == null) ||
                 (this.name != null && this.name.equals(other.name));
@@ -298,34 +298,34 @@ public class Service {
 
         // If dates don't match, sections are not equal
         boolean dateMatch = (this.date == null && other.date == null) ||
-        (this.date != null && this.date.equals(other.date));
+                (this.date != null && this.date.equals(other.date));
 
         if (!dateMatch)
             return false;
 
         // If times don't match, sections are not equal
         boolean timeStartMatch = (this.timeStart == null && other.timeStart == null) ||
-        (this.timeStart != null && this.timeStart.equals(other.timeStart));
+                (this.timeStart != null && this.timeStart.equals(other.timeStart));
 
         if (!timeStartMatch)
             return false;
-        
+
         boolean timeEndMatch = (this.timeEnd == null && other.timeEnd == null) ||
-            (this.timeEnd != null && this.timeEnd.equals(other.timeEnd));
-    
+                (this.timeEnd != null && this.timeEnd.equals(other.timeEnd));
+
         if (!timeEndMatch)
-            return false;        
+            return false;
 
         // If locations don't match, sections are not equal
         boolean locationMatch = (this.location == null && other.location == null) ||
-        (this.location != null && this.location.equals(other.location));
+                (this.location != null && this.location.equals(other.location));
 
         if (!locationMatch)
             return false;
 
         // If locations don't match, sections are not equal
         boolean menuMatch = (this.menu == null && other.menu == null) ||
-        (this.menu != null && this.menu.equals(other.menu));
+                (this.menu != null && this.menu.equals(other.menu));
 
         if (!menuMatch)
             return false;

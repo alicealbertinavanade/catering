@@ -4,13 +4,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import catering.businesslogic.UseCaseLogicException;
 import catering.businesslogic.event.Service;
 import catering.businesslogic.recipe.RecipeManager;
 import catering.businesslogic.shift.Shift;
+import catering.businesslogic.user.OccasionalWorker;
 import catering.businesslogic.user.User;
+import catering.businesslogic.user.Worker;
 import catering.persistence.BatchUpdateHandler;
 import catering.persistence.PersistenceManager;
 import catering.persistence.ResultHandler;
@@ -75,33 +78,22 @@ public class SummarySheet {
         });
     }
 
-    public static void saveNewSumSheet(SummarySheet s) {
+    public void saveNewSumSheet() {
+        if (id != 0)
+            return; // Already exists
+
         String sumSheetInsert = "INSERT INTO SummarySheets (service_id, owner_id) VALUES (?, ?);";
-        int[] result = PersistenceManager.executeBatchUpdate(sumSheetInsert, 1, new BatchUpdateHandler() {
-            @Override
-            public void handleBatchItem(PreparedStatement ps, int batchCount) throws SQLException {
-                ps.setInt(1, s.service.getId());
-                ps.setInt(2, s.owner.getId());
-            }
+        PersistenceManager.executeUpdate(sumSheetInsert,
+                service.getId(),
+                owner.getId());
 
-            @Override
-            public void handleGeneratedIds(ResultSet rs, int count) throws SQLException {
-                // should be only one
-                if (count == 0) {
-                    s.id = rs.getInt(1);
-                }
-            }
-        });
+        id = PersistenceManager.getLastId();
 
-        if (result[0] > 0) {
-            LOGGER.info("result: " + result[0]);
-            if (!s.assignmentList.isEmpty()) {
-                Assignment.saveAllNewAssignment(s.id, s.assignmentList);
-            }
-            LOGGER.info("SummarySheet created with ID: " + s.id);
-            if (!s.taskList.isEmpty()) {
-                Task.saveAllNewTasks(s.id, s.taskList);
-            }
+        if (!assignmentList.isEmpty()) {
+            Assignment.saveAllNewAssignment(id, assignmentList);
+        }
+        if (!taskList.isEmpty()) {
+            Task.saveAllNewTasks(id, taskList);
         }
     }
 
@@ -141,21 +133,81 @@ public class SummarySheet {
         return summarySheets;
     }
 
-    public SummarySheet(Service service, User user, boolean includeCommonTasks) {
+    public SummarySheet(Service service, User user, boolean includeCommonTasks) throws UseCaseLogicException {
         this.service = service;
         this.owner = user;
         taskList = new ArrayList<Task>();
         assignmentList = new ArrayList<>();
 
         service.getMenu().getKitchenProcesses()
-                .forEach(kitchenProcess -> taskList
-                        .add(new Task(kitchenProcess, kitchenProcess.getName(), kitchenProcess.getType())));
+                .forEach(kitchenProcess -> {
+                    // try {
+                    Task task = new Task(kitchenProcess, kitchenProcess.getName(), kitchenProcess.getType());
+                    taskList.add(task);
+                    /*
+                     * ArrayList<Integer> roles = kitchenProcess.getRequiredRole();
+                     * if (kitchenProcess.getRequiredRole() == null) {
+                     * LOGGER.warning(
+                     * "Kitchen process " + kitchenProcess.getName() +
+                     * " has no required role defined.");
+                     * throw new UseCaseLogicException("Kitchen process " + kitchenProcess.getName()
+                     * + " has no required role defined.");
+                     * }
+                     * Map<Shift, User> booking =
+                     * Worker.getWorkerAvailableFilteredByRole(service.getDate(),
+                     * service.getTimeStart(),
+                     * service.getTimeEnd(), roles);
+                     * if (booking.isEmpty()) {
+                     * LOGGER.warning("No worker available for task: " + kitchenProcess.getName());
+                     * } else {
+                     * // Prendi solo il primo worker disponibile
+                     * Map.Entry<Shift, User> firstEntry = booking.entrySet().iterator().next();
+                     * Shift shift = firstEntry.getKey();
+                     * User assignedUser = firstEntry.getValue();
+                     * 
+                     * assignmentList.add(new Assignment(task, shift, assignedUser));
+                     * }
+                     * 
+                     * } catch (UseCaseLogicException e) {
+                     * throw new RuntimeException(e);
+                     * }
+                     */
+                });
 
         if (includeCommonTasks) {
             RecipeManager recipeManager = new RecipeManager();
             recipeManager.getSupportOperation()
                     .forEach(commonTask -> {
-                        taskList.add(new Task(commonTask, commonTask.getName(), commonTask.getType()));
+                        // try {
+                        Task task = new Task(commonTask, commonTask.getName(), commonTask.getType());
+                        taskList.add(task);
+                        /*
+                         * ArrayList<Integer> roles = commonTask.getRequiredRole();
+                         * if (commonTask.getRequiredRole() == null) {
+                         * LOGGER.warning(
+                         * "Kitchen process " + commonTask.getName() +
+                         * " has no required role defined.");
+                         * throw new UseCaseLogicException("Kitchen process " + commonTask.getName()
+                         * + " has no required role defined.");
+                         * }
+                         * Map<Shift, User> booking =
+                         * Worker.getWorkerAvailableFilteredByRole(service.getDate(),
+                         * service.getTimeStart(),
+                         * service.getTimeEnd(), roles);
+                         * if (booking.isEmpty()) {
+                         * LOGGER.warning("No worker available for task: " + commonTask.getName());
+                         * } else {
+                         * // Prendi solo il primo worker disponibile
+                         * Map.Entry<Shift, User> firstEntry = booking.entrySet().iterator().next();
+                         * Shift shift = firstEntry.getKey();
+                         * User assignedUser = firstEntry.getValue();
+                         * 
+                         * assignmentList.add(new Assignment(task, shift, assignedUser));
+                         * }
+                         * } catch (UseCaseLogicException e) {
+                         * throw new RuntimeException(e);
+                         * }
+                         */
                     });
         }
     }
@@ -199,11 +251,11 @@ public class SummarySheet {
         return user.equals(this.owner);
     }
 
-    public Assignment modifyAssignment(Assignment ass, Shift shift, User cook) throws SummarySheetException {
+    public Assignment modifyAssignment(Assignment ass, Shift shift, User user) throws SummarySheetException {
         if (!assignmentList.contains(ass))
             throw new SummarySheetException("Invalid Assignment");
         ass.setShift(shift);
-        ass.setCook(cook);
+        ass.setUser(user);
         return ass;
     }
 

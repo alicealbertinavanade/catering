@@ -1,5 +1,7 @@
 package catering.businesslogic.recipe;
 
+import java.util.ArrayList;
+
 /**
  * KitchenProcess represents any food preparation activity in the kitchen.
  * This serves as a common interface for both Recipes and Preparations.
@@ -15,4 +17,6 @@ public interface KitchenProcess {
     int getType();
 
     String getDescription();
+
+    ArrayList<Integer> getRequiredRole();
 }

@@ -9,7 +9,7 @@ public class TaskPersistence implements TaskEventReceiver {
 
     @Override
     public void updateSheetGenerated(SummarySheet summarySheet) {
-        SummarySheet.saveNewSumSheet(summarySheet);
+        summarySheet.saveNewSumSheet();
     }
 
     @Override

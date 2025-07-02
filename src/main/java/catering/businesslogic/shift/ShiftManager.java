@@ -41,8 +41,12 @@ public class ShiftManager {
      * @param s The shift to check
      * @return true if the user is available (not booked) for the shift
      */
-    public boolean isAvailable(User u, Shift s) {
+    public boolean hasUser(User u, Shift s) {
         return s.isBooked(u);
+    }
+
+    public boolean hasAssignment(User u, Shift s) {
+        return s.hasAssignment(u);
     }
 
     /**
@@ -86,7 +90,7 @@ public class ShiftManager {
      * @param user  The user to book for the shift
      */
     public void bookUserForShift(Shift shift, User user) {
-        if (isAvailable(user, shift)) {
+        if (isBooked(user, shift)) {
             LOGGER.info("Booking user " + user.getUserName() + " for shift ID: " + shift.getId());
             shift.addBooking(user);
         } else {

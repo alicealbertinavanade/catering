@@ -119,7 +119,7 @@ public class SummarySheetTest {
             // Verify assignment
             assertNotNull(assignment, "Assignment should not be null");
             assertEquals(taskToAssign, assignment.getTask(), "Assignment should reference the correct task");
-            assertEquals(cook, assignment.getCook(), "Assignment should reference the correct cook");
+            assertEquals(cook, assignment.getUser(), "Assignment should reference the correct cook");
             assertEquals(shift, assignment.getShift(), "Assignment should reference the correct shift");
 
             // Verify assignment is in sheet's assignment list
@@ -128,7 +128,7 @@ public class SummarySheetTest {
 
             LOGGER.info("Successfully assigned task. Assignment details: " +
                     "Task: " + assignment.getTask().getDescription() +
-                    ", Cook: " + assignment.getCook().getUserName() +
+                    ", Cook: " + assignment.getUser().getUserName() +
                     ", Shift: " + assignment.getShift().getDate() + " " +
                     assignment.getShift().getStartTime() + "-" +
                     assignment.getShift().getEndTime());
