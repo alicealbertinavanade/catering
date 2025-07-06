@@ -21,6 +21,7 @@ public class Assignment {
     private Shift shift;
     private Task task;
     private User user;
+    private SummarySheet summarySheet;
 
     // Constructors
     public Assignment(Task task, Shift shift, User user) {
@@ -43,8 +44,16 @@ public class Assignment {
         return shift;
     }
 
+    public SummarySheet getSummarySheet() {
+        return summarySheet;
+    }
+
     public void setShift(Shift shift) {
         this.shift = shift;
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
     }
 
     public User getUser() {
@@ -76,7 +85,7 @@ public class Assignment {
     // Database-related code below this point
     public static Assignment loadAssignment(int id) {
         Assignment[] assignHolder = new Assignment[1]; // Use array to allow modification in lambda
-        String query = "SELECT * FROM Assignment WHERE id = ?";
+        String query = "SELECT * FROM Assignments WHERE id = ?";
 
         PersistenceManager.executeQuery(query, new ResultHandler() {
             @Override
@@ -100,7 +109,7 @@ public class Assignment {
      * @return List of assignments for the summary sheet
      */
     public static ArrayList<Assignment> loadAllAssignmentsBySumSheetId(int id) {
-        String query = "SELECT * FROM Assignment WHERE sumsheet_id = ?";
+        String query = "SELECT * FROM Assignments WHERE sumsheet_id = ?";
         ArrayList<Assignment> assignments = new ArrayList<>();
         ArrayList<Integer> shiftIds = new ArrayList<>();
         ArrayList<Integer> taskIds = new ArrayList<>();
@@ -126,14 +135,48 @@ public class Assignment {
             a.user = User.load(userIds.get(i));
             a.task = Task.loadTaskById(taskIds.get(i));
             a.shift = Shift.loadItemById(shiftIds.get(i));
+        }
 
+        return assignments;
+    }
+
+    public static ArrayList<Assignment> loadAllAssignmentsByUserId(int id) {
+        String query = "SELECT * FROM Assignments WHERE user_id = ?";
+        ArrayList<Assignment> assignments = new ArrayList<>();
+        ArrayList<Integer> shiftIds = new ArrayList<>();
+        ArrayList<Integer> taskIds = new ArrayList<>();
+        ArrayList<Integer> userIds = new ArrayList<>();
+        ArrayList<Integer> summarySheetIds = new ArrayList<>();
+
+        PersistenceManager.executeQuery(query, new ResultHandler() {
+            @Override
+            public void handle(ResultSet rs) throws SQLException {
+                // Create a new Assignment object for each row
+                Assignment a = new Assignment();
+                a.id = rs.getInt("id");
+
+                assignments.add(a);
+
+                shiftIds.add(rs.getInt("shift_id"));
+                taskIds.add(rs.getInt("task_id"));
+                userIds.add(rs.getInt("user_id"));
+                summarySheetIds.add(rs.getInt("sumsheet_id"));
+            }
+        }, id); // Pass id as parameter
+
+        for (int i = 0; i < shiftIds.size(); i++) {
+            Assignment a = assignments.get(i);
+            a.user = User.load(userIds.get(i));
+            a.task = Task.loadTaskById(taskIds.get(i));
+            a.shift = Shift.loadItemById(shiftIds.get(i));
+            a.summarySheet = SummarySheet.getSummarySheetById(summarySheetIds.get(i));
         }
 
         return assignments;
     }
 
     public static ArrayList<Assignment> loadAllAssignmentsByShift(Shift s) {
-        String query = "SELECT * FROM Assignment WHERE shift_id = ?";
+        String query = "SELECT * FROM Assignments WHERE shift_id = ?";
         ArrayList<Assignment> assignments = new ArrayList<>();
         ArrayList<Integer> shiftIds = new ArrayList<>();
         ArrayList<Integer> taskIds = new ArrayList<>();
@@ -152,7 +195,7 @@ public class Assignment {
                 taskIds.add(rs.getInt("task_id"));
                 userIds.add(rs.getInt("user_id"));
             }
-        }, s); // Pass s as parameter
+        }, s.getId()); // Pass s as parameter
 
         for (int i = 0; i < shiftIds.size(); i++) {
             Assignment a = assignments.get(i);
@@ -184,9 +227,13 @@ public class Assignment {
      * @param a The assignment to delete
      */
     public static void deleteAssignment(Assignment a) {
-        String query = "DELETE FROM Assignment WHERE id = ?";
+        String query = "DELETE FROM Assignments WHERE id = ?";
         PersistenceManager.executeUpdate(query, a.id);
+    }
 
+    public static void deleteAllAssignmentByUser(User user) {
+        String query = "DELETE FROM Assignments WHERE user_id = ?";
+        PersistenceManager.executeUpdate(query, user.getId());
     }
 
     /**
@@ -196,7 +243,7 @@ public class Assignment {
      * @param assignmentList The list of assignments to save
      */
     public static void saveAllNewAssignment(int id, ArrayList<Assignment> assignmentList) {
-        String secInsert = "INSERT INTO Assignment (sumsheet_id, shift_id, task_id, user_id) VALUES (?, ?, ?, ?);";
+        String secInsert = "INSERT INTO Assignments (sumsheet_id, shift_id, task_id, user_id) VALUES (?, ?, ?, ?);";
         PersistenceManager.executeBatchUpdate(secInsert, assignmentList.size(), new BatchUpdateHandler() {
             @Override
             public void handleBatchItem(PreparedStatement ps, int batchCount) throws SQLException {
@@ -221,14 +268,13 @@ public class Assignment {
      * @param a  The assignment to save
      */
     public static void saveNewAssignment(int id, Assignment a) {
-        String query = "INSERT INTO Assignment (sumsheet_id, shift_id, task_id, user_id) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO Assignments (sumsheet_id, shift_id, task_id, user_id) VALUES (?, ?, ?, ?)";
         PersistenceManager.executeUpdate(query,
                 id,
                 a.shift.getId(),
                 a.task.getId(),
                 (a.user == null ? 0 : a.user.getId()));
         a.id = PersistenceManager.getLastId();
-
     }
 
     @Override

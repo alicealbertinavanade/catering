@@ -10,6 +10,10 @@ public interface User {
 
     String getUserName();
 
+    String getFiscalCode();
+
+    String getTelephone();
+
     boolean isOccasionalUser();
 
     void setUsername(String username);

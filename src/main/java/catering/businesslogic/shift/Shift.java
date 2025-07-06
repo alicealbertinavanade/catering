@@ -109,7 +109,6 @@ public class Shift {
                 return 0;
         });
 
-        LOGGER.info("Loaded " + shiftArrayList.size() + " shifts");
         return shiftArrayList;
     }
 
@@ -175,6 +174,25 @@ public class Shift {
         }, s.id); // Pass s.id as parameter
 
         LOGGER.fine("Loaded " + bookings.size() + " bookings for shift ID " + s.id);
+        return bookings;
+    }
+
+    public static Map<Integer, Shift> loadBookings(User u) {
+        Map<Integer, Shift> bookings = new HashMap<>();
+        String query = "SELECT shift_id FROM ShiftBookings WHERE user_id = ?";
+
+        PersistenceManager.executeQuery(query, new ResultHandler() {
+            @Override
+            public void handle(ResultSet rs) throws SQLException {
+                int shiftId = rs.getInt("shift_id");
+                Shift shift = Shift.loadItemById(shiftId);
+                if (shift != null) {
+                    bookings.put(shiftId, shift);
+                }
+            }
+        }, u.getId()); // Pass u.getId() as parameter
+
+        LOGGER.fine("Loaded " + bookings.size() + " bookings for user ID " + u.getId());
         return bookings;
     }
 
@@ -294,13 +312,12 @@ public class Shift {
     }
 
     public boolean isBooked(User u) {
-        return bookedUsers.containsValue(u);
+        // Confronta per ID invece di usare containsValue
+        return bookedUsers.containsKey(u.getId());
     }
 
     public boolean hasAssignment(User u) {
         var assignments = Assignment.loadAllAssignmentsByShift(this);
-        assignments
-                .forEach(a -> LOGGER.info("Found assignment: " + a.getId() + " for user " + a.getUser().getUserName()));
         return assignments.stream().anyMatch(a -> a.getUser().getId() == u.getId());
     }
 

@@ -130,9 +130,13 @@ public class TaskManager {
         if (user != null && !CatERing.getInstance().getShiftManager().isBooked(user, s)) {
             throw new UseCaseLogicException("User " + user.getUserName() + " is not available for the selected shift.");
         }
-        if (user != null && CatERing.getInstance().getShiftManager().hasAssignment(user, s)) {
-            throw new UseCaseLogicException("User " + user.getUserName() + " is not available for the selected shift.");
+        if (user != null &&
+                CatERing.getInstance().getShiftManager().hasAssignment(user, s)) {
+            throw new UseCaseLogicException(
+                    "User " + user.getUserName() +
+                            " has already a task for the selected shift.");
         }
+
         Assignment a = currentSumSheet.addAssignment(t, s, user);
         this.notifyAssignmentAdded(a);
 

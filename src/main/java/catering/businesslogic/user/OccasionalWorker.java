@@ -7,9 +7,11 @@ import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import catering.persistence.PersistenceManager;
 import catering.persistence.ResultHandler;
+import catering.util.LogManager;
 
 public class OccasionalWorker implements User {
     private int id;
@@ -20,6 +22,7 @@ public class OccasionalWorker implements User {
     private String telephone;
     private int isOccasionalUser;
     private Set<Role> roles;
+    private static final Logger LOGGER = LogManager.getLogger(OccasionalWorker.class);
 
     /**
      * Default constructor for loading from DB
@@ -75,6 +78,16 @@ public class OccasionalWorker implements User {
     @Override
     public String getUserName() {
         return username;
+    }
+
+    @Override
+    public String getFiscalCode() {
+        return fiscalCode;
+    }
+
+    @Override
+    public String getTelephone() {
+        return telephone;
     }
 
     @Override
@@ -280,11 +293,16 @@ public class OccasionalWorker implements User {
     }
 
     public boolean delete() {
+        String deleteShiftBookings = "DELETE FROM ShiftBookings WHERE user_id = ?";
         String deleteRoles = "DELETE FROM UserRoles WHERE user_id = ?";
         String deleteUser = "DELETE FROM Users WHERE id = ?";
+        String deleteAssignment = "DELETE FROM Assignments WHERE user_id = ?";
 
+        LOGGER.info("Deleting Occasional Worker with ID: " + id);
+        PersistenceManager.executeUpdate(deleteShiftBookings, id);
         PersistenceManager.executeUpdate(deleteRoles, id);
         PersistenceManager.executeUpdate(deleteUser, id);
+        PersistenceManager.executeUpdate(deleteAssignment, id);
         return true;
     }
 

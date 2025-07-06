@@ -62,26 +62,18 @@ public class Task {
     public static void saveAllNewTasks(int id, ArrayList<Task> taskList) {
         String secInsert = "INSERT INTO Tasks (sumsheet_id, kitchenproc_id, description, type, position, ready, quantity, portions) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 
-        PersistenceManager.executeBatchUpdate(secInsert, taskList.size(), new BatchUpdateHandler() {
-            @Override
-            public void handleBatchItem(PreparedStatement ps, int batchCount) throws SQLException {
-                ps.setInt(1, id);
-                ps.setInt(2, taskList.get(batchCount).kitchenProcess.getId());
-                ps.setString(3, taskList.get(batchCount).description);
-                ps.setInt(4, taskList.get(batchCount).type);
-                ps.setInt(5, batchCount);
-                ps.setBoolean(6, taskList.get(batchCount).ready);
-                ps.setInt(7, taskList.get(batchCount).quantity);
-                ps.setInt(8, taskList.get(batchCount).portions);
-            }
-
-            @Override
-            public void handleGeneratedIds(ResultSet rs, int count) throws SQLException {
-                taskList.get(count).id = rs.getInt(1);
-                taskList.get(count).summarySheet = SummarySheet.loadSummarySheetById(rs.getInt(2));
-            }
-        });
-
+        for (Task task : taskList) {
+            PersistenceManager.executeUpdate(secInsert,
+                    id,
+                    task.kitchenProcess.getId(),
+                    task.description,
+                    task.type,
+                    taskList.indexOf(task),
+                    task.ready,
+                    task.quantity,
+                    task.portions);
+            task.id = PersistenceManager.getLastId();
+        }
     }
 
     public static void saveNewTask(int id, Task task, int taskPosition) {
@@ -103,8 +95,7 @@ public class Task {
     public static ArrayList<Task> loadAllTasksBySumSheetId(int id) {
         String query = "SELECT * FROM Tasks WHERE sumsheet_id = ? ORDER BY position";
         ArrayList<Task> taskArrayList = new ArrayList<>();
-        ArrayList<Integer> recipeIds = new ArrayList<>();
-        ArrayList<Boolean> types = new ArrayList<>();
+        ArrayList<Integer> ids = new ArrayList<>();
 
         PersistenceManager.executeQuery(query, new ResultHandler() {
             @Override
@@ -118,20 +109,21 @@ public class Task {
                 t.portions = rs.getInt("portions");
                 t.ready = rs.getBoolean("ready");
                 t.quantity = rs.getInt("quantity");
-                recipeIds.add(rs.getInt("kitchenproc_id")); // Changed from kitchen_proc_id
-                types.add(rs.getBoolean("type"));
+                ids.add(rs.getInt("kitchenproc_id")); // Changed from kitchen_proc_id
+                t.type = rs.getInt("type");
                 taskArrayList.add(t);
             }
         }, id); // Pass id as parameter
 
-        for (int i = 0; i < recipeIds.size(); i++) {
+        for (int i = 0; i < ids.size(); i++) {
             Task t = taskArrayList.get(i);
-            if (types.get(i)) {
-                t.kitchenProcess = Recipe.loadRecipe(recipeIds.get(i));
-            } else {
-                t.kitchenProcess = Preparation.loadPreparationById(recipeIds.get(i));
+            if (t.type == 1) {
+                t.kitchenProcess = Preparation.loadPreparationById(ids.get(i));
+            } else if (t.type == 2) {
+                t.kitchenProcess = Recipe.loadRecipe(ids.get(i));
+            } else if (t.type == 3) {
+                t.kitchenProcess = SupportOperation.loadSupportOperationById(ids.get(i));
             }
-
         }
 
         return taskArrayList;

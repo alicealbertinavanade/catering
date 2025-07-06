@@ -1,7 +1,11 @@
 package catering.businesslogic.user;
 
+import java.sql.Date;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 import catering.businesslogic.UseCaseLogicException;
+import catering.businesslogic.kitchen.Assignment;
+import catering.businesslogic.vacationRequest.VacationRequest;
 import catering.util.LogManager;
 
 public class UserManager {
@@ -21,6 +25,25 @@ public class UserManager {
 
     public User getCurrentUser() {
         return this.currentUser;
+    }
+
+    public User promoteUser(User occasionalWorker) throws UseCaseLogicException {
+        if (occasionalWorker.isOccasionalUser()) {
+            LOGGER.info("Promoting user: " + occasionalWorker.getUserName());
+            return Worker.promoteOccasionalWorker((OccasionalWorker) occasionalWorker);
+        } else {
+            LOGGER.info("User is a Worker, no promotion needed");
+            return occasionalWorker;
+        }
+    }
+
+    public VacationRequest requestVacation(Date fromDate, Date toDate) throws UseCaseLogicException {
+        if (!currentUser.isOccasionalUser()) {
+            return Worker.requestVacation((Worker) currentUser, fromDate, toDate);
+        } else {
+            LOGGER.info("User is a Occasional Worker, no vacation request needed");
+            return null;
+        }
     }
 
     public void setCurrentUser(User user) {

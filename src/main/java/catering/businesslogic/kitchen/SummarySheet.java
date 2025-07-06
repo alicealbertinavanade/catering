@@ -41,6 +41,18 @@ public class SummarySheet {
         return loadSummarySheets("SELECT * FROM SummarySheets");
     }
 
+    public static SummarySheet getSummarySheetById(int id) {
+        String query = "SELECT * FROM SummarySheets WHERE id = ?";
+        SummarySheet s = new SummarySheet();
+        PersistenceManager.executeQuery(query, new ResultHandler() {
+            @Override
+            public void handle(ResultSet rs) throws SQLException {
+                s.id = rs.getInt("id");
+            }
+        }, id);
+        return s;
+    }
+
     /**
      * Loads a specific summary sheet by ID
      * 

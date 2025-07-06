@@ -1,6 +1,6 @@
 -- database: catering.db
 -- 1) FIRST REMOVE ALL TABLES (in reverse dependency order)
-DROP TABLE IF EXISTS `Assignment`;
+DROP TABLE IF EXISTS `Assignments`;
 
 DROP TABLE IF EXISTS `Tasks`;
 
@@ -36,7 +36,7 @@ DROP TABLE IF EXISTS `Roles`;
 
 DROP TABLE IF EXISTS `Users`;
 
-DROP TABLE IF EXISTS `VacationRequest`;
+DROP TABLE IF EXISTS `VacationRequests`;
 
 -- 2) CREATE ALL TABLES (in dependency order)
 -- Start with tables that don't depend on others
@@ -161,7 +161,7 @@ CREATE TABLE
     `ShiftBookings` (
         `shift_id` INTEGER NOT NULL,
         `user_id` INTEGER NOT NULL,
-        PRIMARY KEY (`shift_id`, `user_id`),
+        PRIMARY KEY (`shift_id`, `user_id`)
     );
 
 CREATE TABLE
@@ -189,7 +189,7 @@ CREATE TABLE
     );
 
 CREATE TABLE
-    `Assignment` (
+    `Assignments` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT,
         `sumsheet_id` INTEGER NOT NULL,
         `task_id` INTEGER NOT NULL,
@@ -202,7 +202,7 @@ CREATE TABLE
     );
 
 CREATE TABLE
-    `VacationRequest` (
+    `VacationRequests` (
         `id` INTEGER PRIMARY KEY AUTOINCREMENT,
         `user_id` INTEGER NOT NULL,
         `approved` INTEGER DEFAULT NULL,

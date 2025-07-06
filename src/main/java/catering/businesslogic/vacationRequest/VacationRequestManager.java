@@ -26,15 +26,6 @@ public class VacationRequestManager {
         this.currentVacationRequest = currentVacationRequest;
     }
 
-    public VacationRequest createVacationRequest(Date fromDate, Date toDate) {
-        User user = CatERing.getInstance().getUserManager().getCurrentUser();
-
-        VacationRequest m = new VacationRequest(fromDate, toDate, user);
-        this.setCurrentVacationRequest(m);
-
-        return m;
-    }
-
     public void addReceiver(VacationRequestReceiver receiver) {
         receivers.add(receiver);
     }
