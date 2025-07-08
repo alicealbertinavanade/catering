@@ -127,11 +127,10 @@ public class TaskManager {
         if (currentSumSheet == null) {
             throw new UseCaseLogicException("Cannot assign task because there is no active summary sheet.");
         }
-        if (user != null && !CatERing.getInstance().getShiftManager().isBooked(user, s)) {
+        if (user != null && !s.isBooked(user)) {
             throw new UseCaseLogicException("User " + user.getUserName() + " is not available for the selected shift.");
         }
-        if (user != null &&
-                CatERing.getInstance().getShiftManager().hasAssignment(user, s)) {
+        if (user != null && s.hasAssignment(user)) {
             throw new UseCaseLogicException(
                     "User " + user.getUserName() +
                             " has already a task for the selected shift.");

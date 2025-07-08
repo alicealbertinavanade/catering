@@ -18,6 +18,14 @@ public interface User {
 
     void setUsername(String username);
 
+    void setName(String name);
+
+    void setSurname(String surname);
+
+    void setFiscalCode(String fiscalCode);
+
+    void setTelephone(String telephone);
+
     int getId();
 
     void setId(int id);
@@ -36,32 +44,60 @@ public interface User {
 
     Set<Role> getRoles();
 
-    // Factory methods for loading users
+    static boolean delete(User user) {
+        Worker worker = Worker.load(user.getId());
+        if (worker != null && worker.getId() > 0) {
+            return worker.delete();
+        }
+
+        OccasionalWorker occasionalWorker = OccasionalWorker.load(user.getId());
+        if (occasionalWorker != null && occasionalWorker.getId() > 0) {
+            return occasionalWorker.delete();
+        }
+        return true;
+    }
+
+    static boolean save(User user) {
+        Worker worker = Worker.load(user.getId());
+        if (worker != null && worker.getId() > 0) {
+            return worker.save();
+        }
+
+        OccasionalWorker occasionalWorker = OccasionalWorker.load(user.getId());
+        if (occasionalWorker != null && occasionalWorker.getId() > 0) {
+            return occasionalWorker.save();
+        }
+        return true;
+    }
+
+    static boolean update(User user) {
+        Worker worker = Worker.load(user.getId());
+        if (worker != null && worker.getId() > 0) {
+            return worker.update();
+        }
+
+        OccasionalWorker occasionalWorker = OccasionalWorker.load(user.getId());
+        if (occasionalWorker != null && occasionalWorker.getId() > 0) {
+            return occasionalWorker.update();
+        }
+        return true;
+    }
+
     static User load(String username) {
         if (username == null || username.trim().isEmpty()) {
             return null;
         }
 
-        try {
-            // First try to load as Worker
-            Worker worker = Worker.load(username);
-            if (worker != null && worker.getId() > 0) {
-                return worker;
-            }
-        } catch (Exception e) {
-            // Log error but continue trying OccasionalWorker
-            System.err.println("Error loading as Worker: " + e.getMessage());
+        // First try to load as Worker
+        Worker worker = Worker.load(username);
+        if (worker != null && worker.getId() > 0) {
+            return worker;
         }
 
-        try {
-            // If not found as Worker, try OccasionalWorker
-            OccasionalWorker occasionalWorker = OccasionalWorker.load(username);
-            if (occasionalWorker != null && occasionalWorker.getId() > 0) {
-                return occasionalWorker;
-            }
-        } catch (Exception e) {
-            // Log error but continue
-            System.err.println("Error loading as OccasionalWorker: " + e.getMessage());
+        // If not found as Worker, try OccasionalWorker
+        OccasionalWorker occasionalWorker = OccasionalWorker.load(username);
+        if (occasionalWorker != null && occasionalWorker.getId() > 0) {
+            return occasionalWorker;
         }
 
         return null; // User not found
@@ -72,26 +108,14 @@ public interface User {
             return null;
         }
 
-        try {
-            // First try to load as Worker
-            Worker worker = Worker.load(uid);
-            if (worker != null && worker.getId() > 0) {
-                return worker;
-            }
-        } catch (Exception e) {
-            // Log error but continue trying OccasionalWorker
-            System.err.println("Error loading Worker by ID: " + e.getMessage());
+        Worker worker = Worker.load(uid);
+        if (worker != null && worker.getId() > 0) {
+            return worker;
         }
 
-        try {
-            // If not found as Worker, try OccasionalWorker
-            OccasionalWorker occasionalWorker = OccasionalWorker.load(uid);
-            if (occasionalWorker != null && occasionalWorker.getId() > 0) {
-                return occasionalWorker;
-            }
-        } catch (Exception e) {
-            // Log error but continue
-            System.err.println("Error loading OccasionalWorker by ID: " + e.getMessage());
+        OccasionalWorker occasionalWorker = OccasionalWorker.load(uid);
+        if (occasionalWorker != null && occasionalWorker.getId() > 0) {
+            return occasionalWorker;
         }
 
         return null; // User not found
@@ -100,24 +124,16 @@ public interface User {
     static ArrayList<User> loadAllUsers() {
         ArrayList<User> allUsers = new ArrayList<>();
 
-        try {
-            // Load all Workers
-            ArrayList<Worker> workers = Worker.loadAllUsers();
-            if (workers != null) {
-                allUsers.addAll(workers);
-            }
-        } catch (Exception e) {
-            System.err.println("Error loading Workers: " + e.getMessage());
+        // Load all Workers
+        ArrayList<Worker> workers = Worker.loadAllUsers();
+        if (workers != null) {
+            allUsers.addAll(workers);
         }
 
-        try {
-            // Load all OccasionalWorkers
-            ArrayList<OccasionalWorker> occasionalWorkers = OccasionalWorker.loadAllUsers();
-            if (occasionalWorkers != null) {
-                allUsers.addAll(occasionalWorkers);
-            }
-        } catch (Exception e) {
-            System.err.println("Error loading OccasionalWorkers: " + e.getMessage());
+        // Load all OccasionalWorkers
+        ArrayList<OccasionalWorker> occasionalWorkers = OccasionalWorker.loadAllUsers();
+        if (occasionalWorkers != null) {
+            allUsers.addAll(occasionalWorkers);
         }
 
         return allUsers;

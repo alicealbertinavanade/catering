@@ -57,8 +57,7 @@ public class ShiftManager {
      * @param endTime   The end time
      * @return The newly created shift
      */
-    public Shift createShift(Date date, Time startTime, Time endTime, String workPlace, boolean isKitchen) {
-        LOGGER.info("Creating new shift on " + date + " at " + workPlace);
+    public Shift createShift(Date date, Time startTime, Time endTime) {
         return Shift.createShift(date, startTime, endTime);
     }
 

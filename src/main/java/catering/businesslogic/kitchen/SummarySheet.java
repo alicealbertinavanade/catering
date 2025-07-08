@@ -156,34 +156,7 @@ public class SummarySheet {
                     // try {
                     Task task = new Task(kitchenProcess, kitchenProcess.getName(), kitchenProcess.getType());
                     taskList.add(task);
-                    /*
-                     * ArrayList<Integer> roles = kitchenProcess.getRequiredRole();
-                     * if (kitchenProcess.getRequiredRole() == null) {
-                     * LOGGER.warning(
-                     * "Kitchen process " + kitchenProcess.getName() +
-                     * " has no required role defined.");
-                     * throw new UseCaseLogicException("Kitchen process " + kitchenProcess.getName()
-                     * + " has no required role defined.");
-                     * }
-                     * Map<Shift, User> booking =
-                     * Worker.getWorkerAvailableFilteredByRole(service.getDate(),
-                     * service.getTimeStart(),
-                     * service.getTimeEnd(), roles);
-                     * if (booking.isEmpty()) {
-                     * LOGGER.warning("No worker available for task: " + kitchenProcess.getName());
-                     * } else {
-                     * // Prendi solo il primo worker disponibile
-                     * Map.Entry<Shift, User> firstEntry = booking.entrySet().iterator().next();
-                     * Shift shift = firstEntry.getKey();
-                     * User assignedUser = firstEntry.getValue();
-                     * 
-                     * assignmentList.add(new Assignment(task, shift, assignedUser));
-                     * }
-                     * 
-                     * } catch (UseCaseLogicException e) {
-                     * throw new RuntimeException(e);
-                     * }
-                     */
+
                 });
 
         if (includeCommonTasks) {
@@ -193,33 +166,7 @@ public class SummarySheet {
                         // try {
                         Task task = new Task(commonTask, commonTask.getName(), commonTask.getType());
                         taskList.add(task);
-                        /*
-                         * ArrayList<Integer> roles = commonTask.getRequiredRole();
-                         * if (commonTask.getRequiredRole() == null) {
-                         * LOGGER.warning(
-                         * "Kitchen process " + commonTask.getName() +
-                         * " has no required role defined.");
-                         * throw new UseCaseLogicException("Kitchen process " + commonTask.getName()
-                         * + " has no required role defined.");
-                         * }
-                         * Map<Shift, User> booking =
-                         * Worker.getWorkerAvailableFilteredByRole(service.getDate(),
-                         * service.getTimeStart(),
-                         * service.getTimeEnd(), roles);
-                         * if (booking.isEmpty()) {
-                         * LOGGER.warning("No worker available for task: " + commonTask.getName());
-                         * } else {
-                         * // Prendi solo il primo worker disponibile
-                         * Map.Entry<Shift, User> firstEntry = booking.entrySet().iterator().next();
-                         * Shift shift = firstEntry.getKey();
-                         * User assignedUser = firstEntry.getValue();
-                         * 
-                         * assignmentList.add(new Assignment(task, shift, assignedUser));
-                         * }
-                         * } catch (UseCaseLogicException e) {
-                         * throw new RuntimeException(e);
-                         * }
-                         */
+
                     });
         }
     }

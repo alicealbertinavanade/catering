@@ -1,6 +1,6 @@
 package catering.businesslogic.user;
 
-import java.sql.Date;
+import java.util.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
@@ -13,9 +13,7 @@ import java.util.logging.Logger;
 
 import catering.businesslogic.UseCaseLogicException;
 import catering.businesslogic.kitchen.Assignment;
-import catering.businesslogic.kitchen.SummarySheet;
 import catering.businesslogic.shift.Shift;
-import catering.businesslogic.vacationRequest.VacationRequest;
 import catering.persistence.PersistenceManager;
 import catering.persistence.ResultHandler;
 import catering.util.LogManager;
@@ -28,7 +26,6 @@ public class Worker implements User {
     private String telephone;
     private String fiscalCode;
     private int vacationDays;
-    private int isOccasionalUser;
     private Set<Role> roles;
     private static final Logger LOGGER = LogManager.getLogger(Worker.class);
 
@@ -123,14 +120,29 @@ public class Worker implements User {
         return sb.toString();
     }
 
-    /**
-     * Sets the username for this worker
-     * 
-     * @param username The new username
-     */
     @Override
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    @Override
+    public void setFiscalCode(String fiscalCode) {
+        this.fiscalCode = fiscalCode;
+    }
+
+    @Override
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     /**
@@ -194,8 +206,7 @@ public class Worker implements User {
             assignments.forEach((assignment) -> {
                 var assignmentWorker = new Assignment(assignment.getTask(),
                         assignment.getShift(), worker);
-                Assignment.saveNewAssignment(assignment.getSummarySheet().getId(),
-                        assignmentWorker);
+                assignmentWorker.save(assignment.getSummarySheet().getId());
             });
         }
 
@@ -259,56 +270,6 @@ public class Worker implements User {
         });
 
         return workers;
-    }
-
-    public static Map<Shift, User> getWorkerAvailableFilteredByRole(Date date, Time startTime, Time endTime,
-            ArrayList<Integer> role) {
-        String userQuery = "SELECT ShiftBookings.* FROM ShiftBookings "
-                + "INNER JOIN Users ON Users.id = ShiftBookings.user_id "
-                + "INNER JOIN Shifts ON ShiftBookings.shift_id = Shifts.id "
-                + "INNER JOIN UserRoles ON Users.id = UserRoles.user_id "
-                + "WHERE Users.is_occasional_user = 0 "
-                + "AND Shifts.date = ? "
-                + "AND Shifts.start_time <= ? "
-                + "AND Shifts.end_time >= ? "
-                + "AND UserRoles.role_id IN (";
-
-        // Aggiungi i ruoli alla query
-        for (int i = 0; i < role.size(); i++) {
-            userQuery += role.get(i);
-            if (i < role.size() - 1) {
-                userQuery += ",";
-            }
-        }
-
-        userQuery += ") "
-                + "AND NOT EXISTS ("
-                + "SELECT 1 FROM Assignments "
-                + "INNER JOIN Tasks ON Assignments.task_id = Tasks.id "
-                + "INNER JOIN SummarySheets ON Tasks.sumsheet_id = SummarySheets.id "
-                + "INNER JOIN Services ON SummarySheets.service_id = Services.id "
-                + "WHERE Assignments.user_id = Users.id "
-                + "AND Services.date = ? "
-                + "AND Services.start_time < ? "
-                + "AND Services.end_time > ? "
-                + ") ";
-        Map<Shift, User> booking = new HashMap<>();
-
-        PersistenceManager.executeQuery(userQuery, new ResultHandler() {
-            @Override
-            public void handle(ResultSet rs) throws SQLException {
-                int shiftId = rs.getInt("shift_id");
-                Shift shift = Shift.loadItemById(shiftId);
-                int userId = rs.getInt("user_id");
-                User user = User.load(userId);
-                if (user != null) {
-                    booking.put(shift, user);
-                }
-            }
-        }, date.toString(), startTime.toString(), endTime.toString(), date.toString(), endTime.toString(),
-                startTime.toString());
-
-        return booking;
     }
 
     // Helper method to load roles for a worker
@@ -387,21 +348,18 @@ public class Worker implements User {
      * @return true if successful, false otherwise
      */
     public boolean delete() {
-        if (id == 0)
-            return false; // Not in DB
+        String deleteShiftBookings = "DELETE FROM ShiftBookings WHERE user_id = ?";
+        String deleteRoles = "DELETE FROM UserRoles WHERE user_id = ?";
+        String deleteAssignment = "DELETE FROM Assignments WHERE user_id = ?";
+        String deleteVacationRequests = "DELETE FROM VacationRequests WHERE user_id = ?";
+        String deleteUser = "DELETE FROM Users WHERE id = ?";
 
-        // First delete worker roles
-        String deleteRolesQuery = "DELETE FROM UserRoles WHERE user_id = ?";
-        PersistenceManager.executeUpdate(deleteRolesQuery, id);
-
-        // Then delete worker
-        String deleteUserQuery = "DELETE FROM Users WHERE id = ?";
-        int rows = PersistenceManager.executeUpdate(deleteUserQuery, id);
-
-        if (rows > 0) {
-            id = 0;
-            return true;
-        }
+        LOGGER.info("Deleting Worker with ID: " + id);
+        PersistenceManager.executeUpdate(deleteShiftBookings, id);
+        PersistenceManager.executeUpdate(deleteRoles, id);
+        PersistenceManager.executeUpdate(deleteAssignment, id);
+        PersistenceManager.executeUpdate(deleteVacationRequests, id);
+        PersistenceManager.executeUpdate(deleteUser, id);
         return false;
     }
 
@@ -496,13 +454,20 @@ public class Worker implements User {
         this.vacationDays = vacationDays;
     }
 
-    public static VacationRequest requestVacation(Worker worker, Date fromDate, Date toDate)
-            throws UseCaseLogicException {
-        VacationRequest request = new VacationRequest(fromDate, toDate, worker);
+    public boolean hasAssignment(Date fromDate, Date toDate) throws UseCaseLogicException {
+        String query = "SELECT COUNT(*) as count FROM Assignments " +
+                "INNER JOIN Shifts ON Assignments.shift_id = Shifts.id " +
+                "WHERE Assignments.user_id = " + id + " " +
+                "AND Shifts.date >= '" + new java.sql.Date(fromDate.getTime()) + "' " + // Data shift >= data inizio
+                "AND Shifts.date <= '" + new java.sql.Date(toDate.getTime()) + "'"; // Data shift <= data fine
+        final int[] count = { 0 };
+        PersistenceManager.executeQuery(query, new ResultHandler() {
+            @Override
+            public void handle(ResultSet rs) throws SQLException {
+                count[0] = rs.getInt("count"); // Usa rs.getInt("count") invece di count[0] + 1
+            }
+        }); // Aggiungi id come primo parametro
 
-        String insertQuery = "INSERT INTO VacationRequests (user_id, from_date, to_date) VALUES (?, ?, ?)";
-        PersistenceManager.executeUpdate(insertQuery, worker.getId(), fromDate, toDate);
-
-        return request;
+        return count[0] > 0;
     }
 }

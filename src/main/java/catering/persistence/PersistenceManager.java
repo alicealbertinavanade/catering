@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 import catering.util.LogManager;
 
-
 public class PersistenceManager {
 
     private static final Logger LOGGER = LogManager.getLogger(PersistenceManager.class);
@@ -73,7 +72,7 @@ public class PersistenceManager {
 
             // Execute each statement
             try (Connection conn = DriverManager.getConnection(URL);
-                 Statement stmt = conn.createStatement()) {
+                    Statement stmt = conn.createStatement()) {
 
                 for (String statement : statements) {
                     String trimmedStmt = statement.trim();
@@ -108,7 +107,6 @@ public class PersistenceManager {
 
             // Set parameters if any
             setParameters(ps, params);
-
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     handler.handle(rs);

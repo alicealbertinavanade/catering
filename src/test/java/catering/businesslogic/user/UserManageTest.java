@@ -18,7 +18,6 @@ import catering.businesslogic.kitchen.Assignment;
 import catering.businesslogic.kitchen.SummarySheet;
 import catering.businesslogic.kitchen.Task;
 import catering.businesslogic.shift.Shift;
-import catering.businesslogic.vacationRequest.VacationRequest;
 import catering.persistence.PersistenceManager;
 import catering.util.LogManager;
 
@@ -144,15 +143,15 @@ public class UserManageTest {
     void testVacationRequestAndApprovation() {
         LOGGER.info("Testing vacation request and approvation");
         try {
-            Date fromDate = Date.valueOf("2023-12-01");
-            Date toDate = Date.valueOf("2023-12-10");
+            Date fromDate = Date.valueOf("2025-08-14");
+            Date toDate = Date.valueOf("2025-08-17");
             app.getUserManager().fakeLogin(worker1.getUserName());
 
             VacationRequest vacationRequest = app.getUserManager().requestVacation(fromDate, toDate);
 
             app.getUserManager().fakeLogin(owner.getUserName());
             // Approve the vacation request
-            // app.getUserManager().approveVacationRequest(vacationRequest);
+            app.getUserManager().approveVacationRequest(vacationRequest);
 
         } catch (UseCaseLogicException e) {
             fail("Exception should not be thrown: " + e.getMessage());

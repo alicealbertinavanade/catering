@@ -20,7 +20,6 @@ public class OccasionalWorker implements User {
     private String surname;
     private String fiscalCode;
     private String telephone;
-    private int isOccasionalUser;
     private Set<Role> roles;
     private static final Logger LOGGER = LogManager.getLogger(OccasionalWorker.class);
 
@@ -45,22 +44,18 @@ public class OccasionalWorker implements User {
         this.telephone = telephone;
     }
 
-    @Override
     public boolean isOccasionalUser() {
         return true;
     }
 
-    @Override
     public boolean isCook() {
         return roles.contains(Role.CUOCO);
     }
 
-    @Override
     public boolean isChef() {
         return roles.contains(Role.CHEF);
     }
 
-    @Override
     public boolean isService() {
         return roles.contains(Role.SERVIZIO);
     }
@@ -70,27 +65,22 @@ public class OccasionalWorker implements User {
         return false;
     }
 
-    @Override
     public boolean isOwner() {
         return false;
     }
 
-    @Override
     public String getUserName() {
         return username;
     }
 
-    @Override
     public String getFiscalCode() {
         return fiscalCode;
     }
 
-    @Override
     public String getTelephone() {
         return telephone;
     }
 
-    @Override
     public int getId() {
         return this.id;
     }
@@ -103,6 +93,26 @@ public class OccasionalWorker implements User {
     @Override
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    @Override
+    public void setFiscalCode(String fiscalCode) {
+        this.fiscalCode = fiscalCode;
+    }
+
+    @Override
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     @Override
@@ -131,16 +141,8 @@ public class OccasionalWorker implements User {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getSurname() {
         return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
     }
 
     @Override
@@ -295,14 +297,14 @@ public class OccasionalWorker implements User {
     public boolean delete() {
         String deleteShiftBookings = "DELETE FROM ShiftBookings WHERE user_id = ?";
         String deleteRoles = "DELETE FROM UserRoles WHERE user_id = ?";
-        String deleteUser = "DELETE FROM Users WHERE id = ?";
         String deleteAssignment = "DELETE FROM Assignments WHERE user_id = ?";
+        String deleteUser = "DELETE FROM Users WHERE id = ?";
 
         LOGGER.info("Deleting Occasional Worker with ID: " + id);
         PersistenceManager.executeUpdate(deleteShiftBookings, id);
         PersistenceManager.executeUpdate(deleteRoles, id);
-        PersistenceManager.executeUpdate(deleteUser, id);
         PersistenceManager.executeUpdate(deleteAssignment, id);
+        PersistenceManager.executeUpdate(deleteUser, id);
         return true;
     }
 

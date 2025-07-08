@@ -24,7 +24,7 @@ public class TaskPersistence implements TaskEventReceiver {
 
     @Override
     public void updateAssignmentAdded(SummarySheet currentSumSheet, Assignment a) {
-        Assignment.saveNewAssignment(currentSumSheet.getId(), a);
+        a.save(currentSumSheet.getId());
     }
 
     @Override

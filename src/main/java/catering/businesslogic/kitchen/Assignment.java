@@ -267,14 +267,14 @@ public class Assignment {
      * @param id The summary sheet ID
      * @param a  The assignment to save
      */
-    public static void saveNewAssignment(int id, Assignment a) {
+    public void save(int id) {
         String query = "INSERT INTO Assignments (sumsheet_id, shift_id, task_id, user_id) VALUES (?, ?, ?, ?)";
         PersistenceManager.executeUpdate(query,
                 id,
-                a.shift.getId(),
-                a.task.getId(),
-                (a.user == null ? 0 : a.user.getId()));
-        a.id = PersistenceManager.getLastId();
+                shift.getId(),
+                task.getId(),
+                (user == null ? 0 : user.getId()));
+        this.id = PersistenceManager.getLastId();
     }
 
     @Override

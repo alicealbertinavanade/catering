@@ -1,12 +1,10 @@
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\event\EventReceiver.java
-c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\vacationRequest\VacationRequestReceiver.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\menu\MenuItem.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\recipe\Preparation.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\persistence\MenuPersistence.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\shift\ShiftManager.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\kitchen\SummarySheet.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\event\EventManager.java
-c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\vacationRequest\VacationRequest.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\kitchen\TaskManager.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\kitchen\TaskEventReceiver.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\event\Event.java
@@ -20,10 +18,11 @@ c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\cate
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\kitchen\SummarySheetException.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\recipe\RecipeManager.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\recipe\Recipe.java
+c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\user\VacationRequest.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\user\UserEventReceiver.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\util\DateUtils.java
-c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\vacationRequest\VacationRequestManager.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\util\LogManager.java
+c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\persistence\UserPersistence.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\user\Worker.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\UseCaseLogicException.java
 c:\Users\alice.albertin\Downloads\SAS\Progetto Esame\catering\src\main\java\catering\businesslogic\menu\Section.java

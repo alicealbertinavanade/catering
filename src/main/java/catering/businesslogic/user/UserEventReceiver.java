@@ -1,8 +1,14 @@
 package catering.businesslogic.user;
 
-import catering.businesslogic.kitchen.Task;
-
 public interface UserEventReceiver {
-    public void updateTaskAdded(User u, Task kt);
+    public void updateVacationRequestAdded(VacationRequest vr);
+
+    public void updateVacationRequestStatus(VacationRequest vr);
+
+    public void updateUserAdded(User u);
+
+    public void updateUserChanged(User u);
+
+    public void updateUserDeleted(User u);
 
 }
